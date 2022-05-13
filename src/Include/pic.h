@@ -16,7 +16,7 @@
 // PIC command
 #define PIC_EOI      0x20
 
-void pic_init();
+void init_pic();
 void pic_eoi(unsigned char irq);
 
 #endif

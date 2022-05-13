@@ -4,15 +4,26 @@
 #include <stdint.h>
 #include <stdarg.h>
 #include <stddef.h>
+#include <stdbool.h>
 #include "string.h"
+#include "multiboot.h"
 
 #define KB 1024
 #define MB (1024*KB)
 #define GB (1024*MB)
 
+#define MSECOND 1
+#define SECOND 1000*MSECOND
+#define MINUTE 60*SECOND
+#define HOUR 60*MINUTE
+
 #define HALT asm("cli"); asm("hlt");
 #define ASSERT(x) if(!(x)) { \
+    printf("Assertion failed: %s, %s, %d\n", #x, __FILE__, __LINE__); \
+    HALT; \
+}
 
+#define CPUID(in, a, b, c, d) __asm__("cpuid": "=a"(a), "=b"(b), "=c"(c), "=d"(d) : "a"(in));
 #ifndef KERNEL_BUILD
 #define KERNEL_BUILD "2022-01-01"
 #endif
@@ -22,12 +33,15 @@
 #endif
 
 extern uint32_t end;
+extern uint32_t mboot_addr;
 
 #define KERNEL_BASE 0x100000
 #define KERNEL_END  end
 
-#define KERNEL_VERSION "1.0.3"
+#define KERNEL_VERSION "1.2.0"
 #define KERNEL_NAME "SectorOS-RE2"
+
+void print_cpuinfo();
 
 typedef struct CPUSTATE
 {

@@ -1,9 +1,9 @@
 shell= /bin/sh
-date= $(shell date -Idate)
+date= $(shell date)
 
 CC = gcc
 INC = -Isrc/Include/
-GCCVERSION = $(shell echo gcc & gcc --version | grep ^gcc | sed 's/^.* //g')
+GCCVERSION = $(shell echo $(CC) & $(CC) --version | grep ^gcc | sed 's/^.* //g')
 CFLAGS = $(INC) -g -DKERNEL_BUILD="\"$(date)\"" -DCOMPILER="\"$(GCCVERSION)\"" -m32 -nostdlib -fno-builtin -fno-exceptions -fno-leading-underscore -Wno-write-strings
 
 LD = ld
@@ -31,6 +31,7 @@ OBJECTS = \
 	$(SRCDIR)descriptors/gdt_helper.o	\
 	$(SRCDIR)descriptors/gdt.o	\
 	$(SRCDIR)drivers/cpu/pic.o	\
+	$(SRCDIR)drivers/cpu/pit.o	\
 	$(SRCDIR)Interrupt/exception_helper.o	\
 	$(SRCDIR)Interrupt/exception.o	\
 	$(SRCDIR)Interrupt/interrupt_helper.o	\
@@ -38,9 +39,13 @@ OBJECTS = \
 	$(SRCDIR)descriptors/idt_helper.o	\
 	$(SRCDIR)descriptors/idt.o	\
 	$(SRCDIR)hardcom/port.o \
+	$(SRCDIR)drivers/input/keyboard.o	\
+	$(SRCDIR)drivers/serial/serial.o \
 	$(SRCDIR)drivers/video/vga.o \
 	$(SRCDIR)common/string.o \
 	$(SRCDIR)common/printf.o \
+	$(SRCDIR)common/cpuid.o \
+	$(SRCDIR)program/shell.o \
 	$(SRCDIR)Kernel/KernelMain.o \
 
 all: $(ISOIMAGE)

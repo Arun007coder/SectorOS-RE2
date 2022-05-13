@@ -323,21 +323,21 @@ char* stoc(size_t n)
     char *ret;
     if(((n / MB) >> 10) != 0)
     {
-        sprintf(ret, "%dGB ", n / GB);
+        printf("%dGB\n", n / GB);
     }
     else if (((n / KB) >> 10) != 0)
     {
-        sprintf(ret, "%dMB ", n / MB);
+        printf("%dMB\n", n / MB);
     }
     else if (((n) >> 10) != 0)
     {
-        sprintf(ret, "%dKB ", n / KB);
+        printf("%dKB\n", n / KB);
     }
     else
     {
-        sprintf(ret, "%dB ", n);
+        printf("%dB\n", n);
     }
-    return ret;
+    return 0;
 }
 
 void sprintf(char *s, const char *format, ...)

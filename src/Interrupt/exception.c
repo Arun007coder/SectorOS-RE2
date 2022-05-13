@@ -41,7 +41,7 @@ char* exception_messages[] =
 
 void exception_handler(registers_t cps)
 {
-    if(cps.ino < 32)
+    if(cps.ino < IRQ_BASE)
     {
         change_color(VGA_COLOR_RED, VGA_COLOR_BLACK);
         printf("KERNEL PANIC. EXCEPTION %d: %s\n", cps.ino, exception_messages[cps.ino]);
@@ -65,7 +65,7 @@ void exception_handler(registers_t cps)
     if(interrupt_handlers[cps.ino] != 0)
     {
         isr_t handler = interrupt_handlers[cps.ino];
-        handler(&cps);
+        handler(cps);
     }
     else
     {

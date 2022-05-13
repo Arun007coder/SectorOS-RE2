@@ -3,10 +3,15 @@
 
 #include "system.h"
 
-typedef void (*isr_t)(registers_t *);
+typedef void (*isr_t)(registers_t);
 extern isr_t interrupt_handlers[256];
 
 void register_interrupt_handler(int num, isr_t handler);
+void enable_interrupts();
+void disable_interrupts();
+
+#define IRQ_BASE 0x20
+#define IRQ(n) (IRQ_BASE + n)
 
 
 // Pointer to the Interrupts in idt_helper.asm

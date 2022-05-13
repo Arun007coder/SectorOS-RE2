@@ -1,9 +1,9 @@
 megs: 32
-romimage: file=/usr/share/bochs/BIOS-bochs-latest, address=0xf0000
-vgaromimage: /usr/share/bochs/VGABIOS-elpin-2.40
-floppya: 1_44=/dev/loop0, status=inserted
-boot: a
+ata0-slave: type=cdrom, path=SectorOS_RE2.iso, status=inserted
+com1: enabled=1, mode=file, dev=serial.log
+speaker: enabled=1, mode=sound
 log: bochsout.txt
+boot: cdrom
 mouse: enabled=0
 clock: sync=realtime
-cpu: ips=500000
+cpu: ips=5000000
