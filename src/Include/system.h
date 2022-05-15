@@ -5,7 +5,6 @@
 #include <stdarg.h>
 #include <stddef.h>
 #include <stdbool.h>
-#include "string.h"
 #include "multiboot.h"
 
 #define KB 1024
@@ -18,10 +17,10 @@
 #define HOUR 60*MINUTE
 
 #define HALT asm("cli"); asm("hlt");
-#define ASSERT(x) if(!(x)) { \
-    printf("Assertion failed: %s, %s, %d\n", #x, __FILE__, __LINE__); \
-    HALT; \
-}
+#define ASSERT(b) ((b) ? (void)0 : panic(#b, __FILE__, __LINE__))
+
+void panic(const char* message, const char* file, uint32_t line);
+#define PANIC(msg) panic(msg, __FILE__, __LINE__);
 
 #define CPUID(in, a, b, c, d) __asm__("cpuid": "=a"(a), "=b"(b), "=c"(c), "=d"(d) : "a"(in));
 #ifndef KERNEL_BUILD
@@ -33,12 +32,14 @@
 #endif
 
 extern uint32_t end;
+extern int paging_enabled;
+extern bool kheap_enabled;
 extern uint32_t mboot_addr;
 
-#define KERNEL_BASE 0x100000
+#define KERNEL_BASE 0xC0000000
 #define KERNEL_END  end
 
-#define KERNEL_VERSION "1.2.0"
+#define KERNEL_VERSION "2.0.0"
 #define KERNEL_NAME "SectorOS-RE2"
 
 void print_cpuinfo();

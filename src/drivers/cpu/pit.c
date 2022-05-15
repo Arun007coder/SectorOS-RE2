@@ -10,6 +10,7 @@ static PIT_CALLBACK callbacks[256];
 void timer_callback(registers_t reg)
 {
     pit_ticks++;
+    time_since_boot = pit_ticks / pit_freq;
     if(callbacks_index > 0)
     {
         for(uint32_t i = 0; i < callbacks_index; i++)

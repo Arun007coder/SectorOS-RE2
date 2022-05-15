@@ -23,7 +23,6 @@ void shell_interpreter()
     }
     else if (strstr(shell_buffer, "echo") != NULL)
     {
-        printf("echo: ");
         for (uint8_t i = 5; i < shell_buffer_index; i++)
         {
             printf("%c", shell_buffer[i]);
@@ -40,28 +39,35 @@ void shell_interpreter()
         printf("OS: %s\n", KERNEL_NAME);
         printf("Kernel: %s\n", KERNEL_VERSION);
         printf("Kernel base: 0x%06x\n", KERNEL_BASE);
-        printf("Kernel end: 0x%06x\n", KERNEL_END + KERNEL_BASE);
+        printf("Kernel end: 0x%06x\n", (uint32_t)&end);
+        printf("memory allocator is %s\n", (kheap_enabled) ? "disabled" : "enabled");
+        printf("pageing is %s\n", (paging_enabled) ? "enabled" : "disabled");
         printf("builded on %s using %s\n", KERNEL_BUILD, COMPILER);
         printf("Resolution: %dx%d\n", VGA_WIDTH, VGA_HEIGHT);
         printf("Shell: %s\n", "sosh 0.1.2");
         print_cpuinfo();
         multiboot_info_t* mboot = (multiboot_info_t*)mboot_addr;
-        printf("Memory on system: ");
-        stoc((mboot->mem_upper + 1) * 1024);
+        printf("Memory: ");
+        stoc((mboot->mem_upper * 1024) + (mboot->mem_lower * 1024));
+        printf("\n");
 
         printf("\n");
         for (uint8_t i = 0; i < 32; i++)
         {
             if(i % 16 == 0)
             {
-                change_color(VGA_COLOR_LIGHT_GREEN, VGA_COLOR_BLACK);
+                change_color(VGA_LIGHT_GREEN, VGA_BLACK);
                 printf("\n");
             }
             change_color(0, i);
             printf(" ");
         }
-        change_color(VGA_COLOR_LIGHT_GREEN, VGA_COLOR_BLACK);
+        change_color(VGA_LIGHT_GREEN, VGA_BLACK);
         printf("\n");
+    }
+    else if (strcmp(shell_buffer, "time") == 0)
+    {
+        printf("%d\n", time_since_boot);
     }
     else
     {

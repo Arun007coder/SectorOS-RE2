@@ -152,3 +152,13 @@ void printf(const char *fmt, ...)
     vsprintf(NULL, putchar, fmt, arg);
     va_end(arg);
 }
+
+void printE(const char *fmt, ...)
+{
+    va_list arg;
+    va_start(arg, fmt);
+    change_color(VGA_RED, VGA_BLACK);
+    vsprintf(NULL, putchar, fmt, arg);
+    change_color(VGA_LIGHT_GREEN, VGA_BLACK);
+    va_end(arg);
+}

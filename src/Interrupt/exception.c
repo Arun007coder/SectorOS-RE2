@@ -41,9 +41,9 @@ char* exception_messages[] =
 
 void exception_handler(registers_t cps)
 {
-    if(cps.ino < IRQ_BASE)
+    if(cps.ino < 32)
     {
-        change_color(VGA_COLOR_RED, VGA_COLOR_BLACK);
+        change_color(VGA_RED, VGA_BLACK);
         printf("KERNEL PANIC. EXCEPTION %d: %s\n", cps.ino, exception_messages[cps.ino]);
         printf("Extended stack pointer = 0x%06x\n", cps.esp);
         printf("Extended instruction pointer  = 0x%06x\n", cps.eip);
@@ -59,9 +59,9 @@ void exception_handler(registers_t cps)
         printf("ESI = 0x%06x\n", cps.esi);
         printf("EDI = 0x%06x\n", cps.edi);
         printf("EBP = 0x%06x\n", cps.ebp);
-        change_color(VGA_COLOR_WHITE, VGA_COLOR_BLACK);
-        for(;;);
+        change_color(VGA_WHITE, VGA_BLACK);
     }
+
     if(interrupt_handlers[cps.ino] != 0)
     {
         isr_t handler = interrupt_handlers[cps.ino];

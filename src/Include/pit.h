@@ -14,6 +14,8 @@
 
 typedef void (*PIT_CALLBACK)(void);
 
+static uint32_t time_since_boot;
+
 void init_pit(uint32_t frequency, isr_t callback);
 void chfreq(uint32_t freq);
 void wait(uint32_t ms);

@@ -2,6 +2,7 @@
 #define __STRING_H__
 
 #include "system.h"
+#include "list.h"
 
 int memcmp(uint8_t *data1, uint8_t *data2, int n);
 void *memcpy(void *dst, const void *src, int n);
@@ -34,7 +35,10 @@ int strpbrk(const char *s, const char *accept);
 char* strchr (char *s, int c);
 char* strtok(char *s, const char *delim);
 
-char* stoc(size_t n); //! Not implemented. Requires memory allocation.
+void stoc(size_t n);
+
+list_t *str_split(const char *str, const char *delim, uint32_t *numtokens);
+char *list2str(list_t *list, const char *delim);
 
 void sprintf(char *buf, const char *fmt, ...);
 

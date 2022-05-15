@@ -1,6 +1,7 @@
 #include "string.h"
 #include "printf.h"
 #include "system.h"
+#include "kheap.h"
 
 int memcmp(uint8_t *data1, uint8_t *data2, int n)
 {
@@ -318,27 +319,72 @@ char* strtok(char *s, const char *delim)
     return s;
 }
 
-char* stoc(size_t n)
+bool alloc = false;
+
+void stoc(size_t n)
 {
-    char *ret;
     if(((n / MB) >> 10) != 0)
     {
-        printf("%dGB\n", n / GB);
+        printf("%dGB", n / GB);
     }
     else if (((n / KB) >> 10) != 0)
     {
-        printf("%dMB\n", n / MB);
+        printf("%dMB", n / MB);
     }
     else if (((n) >> 10) != 0)
     {
-        printf("%dKB\n", n / KB);
+        printf("%dKB", n / KB);
     }
     else
     {
-        printf("%dB\n", n);
+        printf("%dB", n);
     }
-    return 0;
 }
+
+list_t *str_split(const char *str, const char *delim, unsigned int *numtokens)
+{
+    list_t *ret_list = list_create();
+    char *s = strdup(str);
+    char *token, *rest = s;
+    while ((token = strsep(&rest, delim)) != NULL)
+    {
+        if (!strcmp(token, "."))
+            continue;
+        if (!strcmp(token, ".."))
+        {
+            if (list_size(ret_list) > 0)
+                list_pop(ret_list);
+            continue;
+        }
+        list_push(ret_list, strdup(token));
+        if (numtokens)
+            (*numtokens)++;
+    }
+    kfree(s);
+    return ret_list;
+}
+
+char *list2str(list_t *list, const char *delim)
+{
+    char *ret = (char*)kmalloc(256);
+    memset(ret, 0, 256);
+    int len = 0, ret_len = 256;
+    while (list_size(list) > 0)
+    {
+        char *temp = (char*)list_pop(list)->val;
+        int len_temp = strlen(temp);
+        if (len + len_temp + 1 + 1 > ret_len)
+        {
+            ret_len = ret_len * 2;
+            ret = (char*)krealloc(ret, ret_len);
+            len = len + len_temp + 1;
+        }
+        strcat(ret, delim);
+        strcat(ret, temp);
+    }
+    return ret;
+}
+
 
 void sprintf(char *s, const char *format, ...)
 {
