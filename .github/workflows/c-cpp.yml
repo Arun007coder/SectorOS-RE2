@@ -14,6 +14,6 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: prepare
-      run: shell 'sudo apt-get install xorriso mtools grub-pc-bin nasm build-essential'
+      run: sudo apt-get install xorriso mtools grub-pc-bin nasm build-essential
     - name: make all
       run: make -f src/Makefile all
