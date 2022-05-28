@@ -14,6 +14,6 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: prepare
-      run: sudo apt-get install xorriso mtools grub-pc-bin nasm build-essential
+      run: sudo apt-get install xorriso mtools grub-pc-bin nasm crossbuild-essential-i386
     - name: make all
-      run: make -f src/Makefile all
+      run: make -f src/Makefile all PREFIX=/use/bin/ CC=i386-elf-gcc LD=i386-elf-ld AS=i386-elf-as
