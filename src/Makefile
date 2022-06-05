@@ -111,7 +111,7 @@ $(ISOIMAGE): stripd $(EXECUTABLE)
 	@echo 'multiboot /boot/$(EXECUTABLE)' >> $(PROJECT)/boot/grub/grub.cfg
 	@echo 'boot' >> $(PROJECT)/boot/grub/grub.cfg
 	@echo '}' >> $(PROJECT)/boot/grub/grub.cfg
-	@$(GRUBDIR)/grub-mkrescue -o $(ISOIMAGE) $(PROJECT) 2> /dev/null
+	@$(GRUBDIR)/grub-mkrescue -o $(ISOIMAGE) $(PROJECT)
 	@rm -rf $(PROJECT)/
 	@printf '$(BLU)ISO Image surcessfully builded. image can be found in $(shell pwd)/$(ISOIMAGE)...\n$(RESET)'
 
