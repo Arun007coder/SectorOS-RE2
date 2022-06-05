@@ -60,6 +60,7 @@ OBJECTS = \
 	$(SRCDIR)Interrupt/exception.o	\
 	$(SRCDIR)Interrupt/interrupt_helper.o	\
 	$(SRCDIR)Interrupt/interrupt.o	\
+	$(SRCDIR)Interrupt/syscall.o	\
 	$(SRCDIR)descriptors/idt_helper.o	\
 	$(SRCDIR)descriptors/idt.o	\
 	$(SRCDIR)hardcom/port.o \

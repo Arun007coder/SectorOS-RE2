@@ -20,6 +20,7 @@
 #include "ata.h"
 #include "ext2.h"
 #include "procfs.h"
+#include "syscall.h"
 
 uint32_t mboot_addr;
 
@@ -31,6 +32,8 @@ void kernelmain(const multiboot_info_t* multiboot, uint32_t multiboot_m)
     init_gdt();
     init_idt();
     init_pic();
+
+    init_syscall();
 
     init_pmm(1096 * MB);
     init_kheap(KHEAP_START, KHEAP_START + KHEAP_INITIAL_SIZE, KHEAP_MAX_ADDRESS);
@@ -75,7 +78,7 @@ void kernelmain(const multiboot_info_t* multiboot, uint32_t multiboot_m)
     printf("Welcome to %s!\n", KERNEL_NAME);
     printf("Type \"help\" for a list of commands.\n\n");
 
-    printf("#> ");
+    printf("/#> ");
 
     while(1);
 }

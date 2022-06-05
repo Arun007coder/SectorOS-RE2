@@ -67,6 +67,10 @@ void exception_handler(registers_t cps)
         isr_t handler = interrupt_handlers[cps.ino];
         handler(cps);
     }
+    else if(cps.ino == 0x80)
+    {
+        printE("Syscall Handler is not yet initialized.\n");
+    }
     else
     {
         PANIC("Unhandled exception!");

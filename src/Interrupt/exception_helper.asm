@@ -3,7 +3,7 @@
     exception%1:
         cli
         push byte 0
-        push byte %1
+        push %1
         jmp exception_common
 %endmacro
 
@@ -11,7 +11,7 @@
     [GLOBAL exception%1]
     exception%1:
         cli
-        push byte %1
+        push %1
         jmp exception_common
 %endmacro
 
@@ -48,6 +48,8 @@ EXCE_NOECODE 28
 EXCE_NOECODE 29
 EXCE_NOECODE 30
 EXCE_NOECODE 31
+EXCE_NOECODE 128
+
 
 [extern exception_handler]
 

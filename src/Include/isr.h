@@ -47,6 +47,7 @@ extern void exception28();    // 0x1C: Exception 28: Spare
 extern void exception29();    // 0x1D: Exception 29: Spare
 extern void exception30();    // 0x1E: Exception 30: Spare
 extern void exception31();    // 0x1F: Exception 31: Spare
+extern void exception128();   // 0x80: Exception 128: System Call
 
 // Pointer to the Interrupts in idt_helper.asm
 extern void irq0();     // 0x20: IRQ 0: Programmable Interrupt Timer

@@ -14,9 +14,13 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: prepare
-      run: make -f src/Makefile install_prereqs
+      run: | 
+        wget https://github.com/lordmilko/i686-elf-tools/releases/download/7.1.0/i686-elf-tools-linux.zip
+        unzip i686-elf-tools-linux.zip
+        mv i686-elf-tools-linux /usr/local/bin/
+        rm i686-elf-tools-linux.zip
     - name: make all
-      run: make -f src/Makefile all PREFIX="$HOME/build-i686" GRUBDIR=/usr/bin
+      run: make -f src/Makefile all PREFIX=/usr/local/bin/i686-elf-tools-linux GRUBDIR=/usr/bin/
     - name: upload_artifacts
       uses: actions/upload-artifact@v3
       with:
