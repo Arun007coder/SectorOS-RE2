@@ -1,6 +1,7 @@
-name: C/C++ CI
+name: SectorOS_RE2 Build
 
 on:
+  workflow_dispatch:
   push:
     branches: [ master ]
   pull_request:
@@ -14,6 +15,13 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: prepare
-      run: sudo apt-get install xorriso mtools grub-pc-bin nasm crossbuild-essential-i386
+      run: make -f src/Makefile install_prereqs
     - name: make all
-      run: make -f src/Makefile all PREFIX=/use/bin/ CC=i386-elf-gcc LD=i386-elf-ld AS=i386-elf-as
+      run: make -f src/Makefile all PREFIX="$HOME/build-i686" GRUBDIR=/usr/bin
+    - name: upload_artifacts
+    - uses: actions/upload-artifact@v3
+      with:
+        name: artifacts
+        path: |
+          *.iso
+          *.elf

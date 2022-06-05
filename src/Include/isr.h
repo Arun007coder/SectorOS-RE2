@@ -52,19 +52,21 @@ extern void exception31();    // 0x1F: Exception 31: Spare
 extern void irq0();     // 0x20: IRQ 0: Programmable Interrupt Timer
 extern void irq1();     // 0x21: IRQ 1: Keyboard
 extern void irq2();     // 0x22: IRQ 2: Cascade (2)
-extern void irq3();     // 0x23: IRQ 3: Cascade (3)
-extern void irq4();     // 0x24: IRQ 4: Cascade (4)
-extern void irq5();     // 0x25: IRQ 5: Cascade (5)
-extern void irq6();     // 0x26: IRQ 6: Cascade (6)
-extern void irq7();     // 0x27: IRQ 7: Cascade (7)
-extern void irq8();     // 0x28: IRQ 8: Cascade (8)
-extern void irq9();     // 0x29: IRQ 9: Cascade (9)
-extern void irq10();    // 0x2A: IRQ 10: Cascade (10)
-extern void irq11();    // 0x2B: IRQ 11: Cascade (11)
-extern void irq12();    // 0x2C: IRQ 12: Cascade (12)
-extern void irq13();    // 0x2D: IRQ 13: Cascade (13)
-extern void irq14();    // 0x2E: IRQ 14: Cascade (14)
-extern void irq15();    // 0x2F: IRQ 15: Cascade (15)
+extern void irq3();     // 0x23: IRQ 3: COM2 (If Enabled)
+extern void irq4();     // 0x24: IRQ 4: COM1 (If Enabled)
+extern void irq5();     // 0x25: IRQ 5: LPT2 (If Enabled)
+extern void irq6();     // 0x26: IRQ 6: Floppy Disk
+extern void irq7();     // 0x27: IRQ 7: LPT1/Spurious Interrupt
+extern void irq8();     // 0x28: IRQ 8: CMOS Real-Time Clock
+extern void irq9();     // 0x29: IRQ 9: Free for peripherals/legacy SCSI
+extern void irq10();    // 0x2A: IRQ 10: Free for peripherals/SCSI/NIC
+extern void irq11();    // 0x2B: IRQ 11: Free for peripherals/SCSI/NIC
+extern void irq12();    // 0x2C: IRQ 12: PS/2 Mouse
+extern void irq13();    // 0x2D: IRQ 13: FPU/Coprocessor/Inter-processor (Deprecated)
+extern void irq14();    // 0x2E: IRQ 14: Primary ATA Hard Disk
+extern void irq15();    // 0x2F: IRQ 15: Secondary ATA Hard Disk
+
+extern void irq128();   // 0x80: IRQ 128: System Call
 
 
 #endif

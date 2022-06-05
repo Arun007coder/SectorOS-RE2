@@ -14,11 +14,22 @@
 
 typedef void (*PIT_CALLBACK)(void);
 
+extern uint32_t pit_ticks;
+extern uint32_t pit_freq;
+
 static uint32_t time_since_boot;
+
+typedef struct 
+{
+    PIT_CALLBACK callback;
+    double seconds;
+    uint32_t ticks;
+}wakeup_t;
 
 void init_pit(uint32_t frequency, isr_t callback);
 void chfreq(uint32_t freq);
+uint32_t get_freq();
 void wait(uint32_t ms);
-void register_function(PIT_CALLBACK callback);
+void register_function(PIT_CALLBACK callback, double seconds);
 
 #endif

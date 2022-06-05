@@ -6,9 +6,12 @@
 #include "string.h"
 #include "vga.h"
 #include "serial.h"
+#include "beeper.h"
+#include "vfs.h"
 
 #define SHELL_BUFFER_SIZE 256
 
 void shell_run(uint8_t);
+void init_shell();
 
 #endif

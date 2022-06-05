@@ -5,6 +5,7 @@
 #include "printf.h"
 #include "port.h"
 #include "pit.h"
+#include "vfs.h"
 
 #define COM1 0x3F8
 #define COM2 0x2F8
@@ -16,5 +17,7 @@ void serial_putc(char c);
 void serial_puts(char *str);
 char serial_getc();
 void serial_printf(char *fmt, ...);
+FILE* serial_getvfsnode();
+bool getSerialInit();
 
 #endif

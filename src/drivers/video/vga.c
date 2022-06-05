@@ -84,6 +84,7 @@ void puts(const char* str)
     }
 }
 
+
 void clear()
 {
     uint16_t blank = 0x20 | (attributeByte << 8);

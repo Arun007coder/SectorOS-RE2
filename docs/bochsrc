@@ -1,8 +1,8 @@
 megs: 32
+ata0-master: path=ext2_hda.img,type=disk
 ata0-slave: type=cdrom, path=SectorOS_RE2.iso, status=inserted
 com1: enabled=1, mode=file, dev=serial.log
 speaker: enabled=1, mode=sound
-log: bochsout.txt
 boot: cdrom
 mouse: enabled=0
 clock: sync=realtime

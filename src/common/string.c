@@ -3,6 +3,10 @@
 #include "system.h"
 #include "kheap.h"
 
+#define FAST_MEMCPY 0
+
+void fast_memcpy(char * dst, const char * src, uint32_t n);
+
 int memcmp(uint8_t *data1, uint8_t *data2, int n)
 {
     while (n--)
@@ -125,6 +129,7 @@ char *strstr(const char *in, const char *str)
 
     return (char *)(in - 1);
 }
+
 int strcpy(char *dst, const char *src)
 {
     int i = 0;
@@ -159,6 +164,7 @@ int strncmp(const char *s1, const char *s2, int c)
 
     return result;
 }
+
 void itoa(char *buf, unsigned long int n, int base)
 {
     unsigned long int tmp;
@@ -193,10 +199,6 @@ int atoi(char *string)
         string += 1;
     }
 
-    /*
-     * Check for a sign.
-     */
-
     if (*string == '-')
     {
         sign = 1;
@@ -228,6 +230,33 @@ int atoi(char *string)
     return result;
 }
 
+
+char* itoa_r(unsigned long int n, int base)
+{
+    unsigned long int tmp;
+    int i, j;
+    char* buf = (char*)kmalloc(sizeof(char) * 32);
+
+    tmp = n;
+    i = 0;
+
+    do
+    {
+        tmp = n % base;
+        buf[i++] = (tmp < 10) ? (tmp + '0') : (tmp + 'a' - 10);
+    } while (n /= base);
+    buf[i--] = 0;
+
+    for (j = 0; j < i; j++, i--)
+    {
+        tmp = buf[j];
+        buf[j] = buf[i];
+        buf[i] = tmp;
+    }
+
+    return buf;
+}
+
 int isspace(char c)
 {
     return c == ' ' || c == '\t' || c == '\n' || c == '\v' || c == '\f' || c == '\r';
@@ -241,27 +270,31 @@ int isprint(char c)
 char *strdup(const char *src)
 {
     int len = strlen(src) + 1;
-    char *dst;
+    char *dst = (char*)kmalloc(len);
     memcpy(dst, src, len);
     return dst;
 }
 
-char *strsep(char **stringp, const char *delim)
+char *strndup(const char *src, uint32_t len)
 {
+    char *dst = (char*)kmalloc(len + 1);
+    memcpy(dst, src, len);
+    dst[len] = '\0';
+    return dst;
+}
+
+char *strsep(char **stringp, const char *delim) {
     char *s;
     const char *spanp;
     int c, sc;
     char *tok;
     if ((s = *stringp) == NULL)
         return (NULL);
-    for (tok = s;;)
-    {
+    for (tok = s;;) {
         c = *s++;
         spanp = delim;
-        do
-        {
-            if ((sc = *spanp++) == c)
-            {
+        do {
+            if ((sc = *spanp++) == c) {
                 if (c == 0)
                     s = NULL;
                 else
@@ -271,52 +304,6 @@ char *strsep(char **stringp, const char *delim)
             }
         } while (sc != 0);
     }
-}
-
-char* strchr(char *s, int c)
-{
-    while (*s)
-        if (*s == c)
-            return (char*)s;
-        else
-            s++;
-    return NULL;
-}
-
-int strpbrk(const char *s, const char *accept)
-{
-    while (*s)
-    {
-        const char *p = accept;
-        while (*p)
-            if (*s == *p++)
-                return (int)(s - (char*)0);
-        s++;
-    }
-    return -1;
-}
-
-char* strtok(char *s, const char *delim)
-{
-    static char *last;
-    if (s == NULL)
-        s = last;
-    while (*s && strchr(delim, *s))
-        s++;
-    if (*s)
-    {
-        char *p = s;
-        while (*p && !strchr(delim, *p))
-            p++;
-        if (*p)
-        {
-            *p++ = '\0';
-            last = p;
-        }
-        else
-            last = NULL;
-    }
-    return s;
 }
 
 bool alloc = false;

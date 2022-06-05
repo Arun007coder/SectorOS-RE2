@@ -31,9 +31,11 @@ void irq_handler(registers_t regs)
 void enable_interrupts()
 {
     asm volatile("sti");
+    printf("Interrupts enabled\n");
 }
 
 void disable_interrupts()
 {
     asm volatile("cli");
+    printf("Interrupts disabled\n");
 }

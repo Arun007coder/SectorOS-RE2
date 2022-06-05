@@ -4,6 +4,7 @@
 #include "system.h"
 #include "printf.h"
 #include "port.h"
+#include "serial.h"
 #include "printf.h"
 
 typedef union pci
@@ -42,6 +43,7 @@ typedef union pci
 #define PCI_OFF_BAR3 0x1C
 #define PCI_OFF_BAR4 0x20
 #define PCI_OFF_BAR5 0x24
+#define PCI_OFF_BAR(x) PCI_OFF_BAR##x
 #define PCI_OFF_INTERRUPT_LINE 0x3C
 #define PCI_OFF_SECONDARY_BUS 0x09
 
@@ -52,8 +54,18 @@ typedef union pci
 #define PCI_TYPE_SATA 0x0106
 #define PCI_NONE 0xFFFF
 
+#define BUS_PER_DOMAIN 8
 #define DEV_PER_BUS 32
 #define FUNC_PER_DEV 32
+
+#define PCI_BUS_MASTER 0x04
+
+#define PCI_DEVTYPE_IO 1
+#define PCI_DEVTYPE_MMIO 0
+
+#define BAR_TYPE(x) (x & 0x01) ? PCI_DEVTYPE_IO : PCI_DEVTYPE_MMIO
+
+#define BAR_IO_GETADDR(x) (uint8_t*)(x & ~0x03)
 
 void init_pci();
 
@@ -69,5 +81,7 @@ pci_t pci_scan_function(uint16_t vendor_id, uint16_t device_id, uint32_t bus, ui
 pci_t pci_scan_device(uint16_t vendor_id, uint16_t device_id, uint32_t bus, uint32_t device, int device_type);
 pci_t pci_scan_bus(uint16_t vendor_id, uint16_t device_id, uint32_t bus, int device_type);
 pci_t pci_get_device(uint16_t vendor_id, uint16_t device_id, int device_type);
+void enumerate_pci_devices();
+void procfs_enumerate_pci_devices(char* buffer);
 
 #endif

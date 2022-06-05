@@ -1,7 +1,10 @@
 #include "shell.h"
+#include "keyboard.h"
 
 char shell_buffer[SHELL_BUFFER_SIZE];
 uint8_t shell_buffer_index = 0;
+
+char* curr_dir;
 
 void shell_interpreter()
 {
@@ -12,10 +15,18 @@ void shell_interpreter()
         printf("\t- Prints this help message\n");
         printf("clear:\n");
         printf("\t- Clears the screen\n");
-        printf("echo:\n");
+        printf("echo [String]:\n");
         printf("\t- Prints the given string\n");
         printf("sysfetch:\n");
         printf("\t- gets information about the system\n");
+        printf("cd [Directory]:\n");
+        printf("\t- Changes the current directory\n");
+        printf("ls [Directory]:\n");
+        printf("\t- Lists the contents of the current directory\n");
+        printf("cat [Filename]:\n");
+        printf("\t- Prints the contents of the given file\n");
+        printf("write [Filename] [Content]:\n");
+        printf("\t- Writes the given content to the given file\n");
     }
     else if (strcmp(shell_buffer, "clear") == 0)
     {
@@ -33,6 +44,124 @@ void shell_interpreter()
     {
         printf("Exiting shell...\n");
         return;
+    }
+    else if(strstr(shell_buffer, "fopen") != NULL)
+    {
+        char* filename = strstr(shell_buffer, "fopen") + 6;
+        filename[strlen(filename)] = '\0';
+        printf("Opening file: %s\n", filename);
+        vfs_node* node = file_open(filename, 0);
+        if(node != NULL)
+        {
+            printf("File opened successfully\n");
+        }
+        else
+        {
+            printf("File could not be opened\n");
+        }
+    }
+    else if(strstr(shell_buffer, "ls") != NULL)
+    {
+        char* filename = strstr(shell_buffer, "ls") + 3;
+        filename[strlen(filename)] = '\0';
+        if(filename[0] == '\0')
+        {
+            VFS_db_listdir(curr_dir);
+            serial_printf("curr_dir: %s\n", curr_dir);
+        }
+        else
+            VFS_db_listdir(filename);
+    }
+    else if(strstr(shell_buffer, "cd") != NULL)
+    {
+        char* filename = strstr(shell_buffer, "cd") + 3;
+        filename[strlen(filename)] = '\0';
+        memset(curr_dir, 0, 512);
+        if(filename[0] == '\0')
+        {
+            strcpy(curr_dir, "/");
+        }
+        else
+        {
+            strcpy(curr_dir, filename);
+        }
+    }
+    else if(strstr(shell_buffer, "cat") != NULL)
+    {
+        char* filename = strstr(shell_buffer, "cat") + 4;
+        filename[strlen(filename)] = '\0';
+        vfs_node* node;
+        if(filename[0] != '/')
+        {
+            char* path = (char*)kmalloc(strlen(curr_dir) + strlen(filename) + 1);
+            strcpy(path, curr_dir);
+            strcat(path, "/");
+            strcat(path, filename);
+            node = file_open(path, 0);
+            kfree(path);
+        }
+        else
+        {
+            node = file_open(filename, 0);
+        }
+        
+        if(node != NULL)
+        {
+            uint32_t size = VFS_getFileSize(node);
+            char* buffer = (char*)kmalloc((sizeof(char) * (size ? size : 1024)));
+            memset(buffer, 0, size);
+            VFS_read(node, 0, size, buffer);
+            printf("\n%s", buffer);
+            kfree(buffer);
+        }
+        else
+        {
+            printf("File could not be opened\n");
+        }
+    }
+    else if(shell_buffer[0] == 'w' && shell_buffer[1] == 'r' && shell_buffer[2] == 'i' && shell_buffer[3] == 't' && shell_buffer[4] == 'e')
+    {
+        char* filename = kmalloc(512);
+        char* buffer = kmalloc(512);
+        uint32_t i = 0;
+        for(i = 6; shell_buffer[i] != ' '; i++)
+        {
+            filename[i - 6] = shell_buffer[i];
+        }
+        filename[i - 6] = '\0';
+        i++;
+        
+        uint32_t j = 0;
+        for(; i < shell_buffer_index; i++)
+        {
+            buffer[j] = shell_buffer[i];
+            j++;
+        }
+        buffer[j] = '\0';
+        vfs_node* node;
+        if(filename[0] != '/')
+        {
+            char* path = (char*)kmalloc(strlen(curr_dir) + strlen(filename) + 1);
+            strcpy(path, curr_dir);
+            strcat(path, "/");
+            strcat(path, filename);
+            node = file_open(path, OPEN_WRONLY);
+            kfree(path);
+        }
+        else
+        {
+            node = file_open(filename, OPEN_WRONLY);
+        }
+        
+        if(node != NULL)
+        {
+            VFS_write(node, 0, strlen(buffer), buffer);
+            //printf("File written successfully\n");
+        }
+        else
+        {
+            printf("File %s could not be opened\n", filename);
+        }
     }
     else if (strcmp(shell_buffer, "sysfetch") == 0)
     {
@@ -73,7 +202,8 @@ void shell_interpreter()
     {
         printf("Unknown command: %s\n", shell_buffer);
     }
-    printf("#> ");
+    printf("%s#> ", curr_dir);
+    serial_printf("current directory: %s\n", curr_dir);
     memset(shell_buffer, 0, SHELL_BUFFER_SIZE);
     shell_buffer_index = 0;
 }
@@ -344,7 +474,7 @@ char KCTC(uint8_t keyCode)
             break;
         case 0x30:
             if (!isShift)
-                result = 'v';
+                result = 'b';
             else
                 result = 'B';
             break;
@@ -393,6 +523,13 @@ char KCTC(uint8_t keyCode)
         }
     }
     return result;
+}
+
+void init_shell()
+{
+    curr_dir = kmalloc(512);
+    strcpy(curr_dir, "/");
+    init_keyboard(shell_run);
 }
 
 void shell_run(uint8_t cmd)

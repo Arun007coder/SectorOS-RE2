@@ -4,7 +4,15 @@ static keyboard_handler_t keyboard_handler = NULL;
 
 void init_keyboard(keyboard_handler_t handler)
 {
-    keyboard_handler = handler;
+    if(handler == NULL)
+    {
+        printf("No keyboard handler given\n");
+        return;
+    }
+    else
+    {
+        keyboard_handler = handler;
+    }
     register_interrupt_handler(IRQ(1), &keyboard_callback);
 
     while(inb(KEYBOARD_COMMAND_PORT) & 0x1)
@@ -16,6 +24,20 @@ void init_keyboard(keyboard_handler_t handler)
     outb(KEYBOARD_DATA_PORT, status);
 
     outb(KEYBOARD_DATA_PORT, 0xF4);
+}
+
+void change_keyboard_handler(keyboard_handler_t handler)
+{
+    if(handler == NULL)
+    {
+        printf("No keyboard handler given\n");
+        handler = NULL;
+        return;
+    }
+    else
+    {
+        keyboard_handler = handler;
+    }
 }
 
 void keyboard_callback(registers_t reg)

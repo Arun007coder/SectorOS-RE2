@@ -293,6 +293,12 @@ vfs_node *file_open(char *file_name, uint32_t flags)
     char *new_start = NULL;
     vfs_node *nextnode = NULL;
     vfs_node *startpoint = get_mountpoint(&filename);
+    if(strcmp(file_name, "/") == 0)
+    {
+        kfree(free_filename);
+        return vfs_root;
+    }
+
     if (!startpoint)
         return NULL;
     if (filename)
@@ -312,13 +318,15 @@ vfs_node *file_open(char *file_name, uint32_t flags)
     return nextnode;
 }
 
-void VFS_init()
+void init_vfs()
 {
     vfs_tree = gentree_create();
     struct vfs_entry *root = (vfs_entry*)kmalloc(sizeof(struct vfs_entry));
     root->name = strdup("root");
     root->file = NULL;
     gentree_insert(vfs_tree, NULL, root);
+
+    printf("Virtual FileSystem successfully initialized\n");
 }
 
 void VFS_mountDev(char *mountpoint, vfs_node *node)
@@ -336,11 +344,10 @@ void VFS_mount_recur(char *path, gentree_node_t *subroot, vfs_node *fs_obj)
         struct vfs_entry *ent = (struct vfs_entry *)subroot->data;
         if (ent->file)
         {
-            printf("A Device is already mounted at the path. Please unmount and try again\n");
+            printE("A Device is already mounted at the path. Please unmount and try again\n");
             return;
         }
-        if (!strcmp(ent->name, PATH_SEPARATOR_STRING))
-            vfs_root = fs_obj;
+        if (!strcmp(ent->name, PATH_SEPARATOR_STRING)) vfs_root = fs_obj;
         ent->file = fs_obj;
         return;
     }
@@ -371,10 +378,10 @@ void VFS_mount(char *path, vfs_node *fs_obj)
     fs_obj->fs_type = 0;
     if (path[0] == '/' && strlen(path) == 1)
     {
-        struct vfs_entry *ent = (struct vfs_entry *)vfs_tree->root->data;
+        vfs_entry *ent = (vfs_entry *)vfs_tree->root->data;
         if (ent->file)
         {
-            printf("A Device is already mounted at the path. Please unmount and try again\n");
+            printE("A Device is already mounted at the path. Please unmount and try again\n");
             return;
         }
         vfs_root = fs_obj;

@@ -4,6 +4,8 @@
 #include "system.h"
 #include "list.h"
 
+void fast_memcpy(char * dst, const char * src, uint32_t n);
+
 int memcmp(uint8_t *data1, uint8_t *data2, int n);
 void *memcpy(void *dst, const void *src, int n);
 void *memset(void *dst, char val, int n);
@@ -22,6 +24,7 @@ int strncmp(const char *s1, const char *s2, int c);
 char *strstr(const char *in, const char *str);
 void strcat(void *dest, const void *src);
 
+char* itoa_r(unsigned long int n, int base);
 void itoa(char *buf, unsigned long int n, int base);
 int atoi(char *string);
 
@@ -29,11 +32,8 @@ int isspace(char c);
 int isprint(char c);
 
 char *strdup(const char *src);
+char *strndup(const char *src, uint32_t len);
 char *strsep(char **stringp, const char *delim);
-
-int strpbrk(const char *s, const char *accept);
-char* strchr (char *s, int c);
-char* strtok(char *s, const char *delim);
 
 void stoc(size_t n);
 

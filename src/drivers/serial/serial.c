@@ -1,6 +1,7 @@
 #include "serial.h"
 
 static uint16_t Port = 0;
+static bool isSerialInit = false;
 
 void init_serial(uint16_t port)
 {
@@ -23,6 +24,7 @@ void init_serial(uint16_t port)
     }
 
     outb(port + 4, 0x0F);
+    isSerialInit = true;
     printf("Serial port %x is working\n", port);
 }
 
@@ -44,8 +46,17 @@ int is_transmit_empty()
 
 void serial_putc(char c)
 {
-    while(is_transmit_empty() == 0);
-    outb(Port, c);
+    if(isSerialInit)
+    {
+        while(is_transmit_empty() == 0);
+        if(c == '\n')
+            serial_putc('\r');
+        outb(Port, c);
+    }
+    else
+    {
+        putchar(c);
+    }
 }
 
 void serial_puts(char* str)
@@ -57,10 +68,53 @@ void serial_puts(char* str)
     }
 }
 
+uint32_t serial_read(vfs_node *file, uint32_t offset, uint32_t size, char *buffer)
+{
+    for(uint32_t i = 0; i < size; i++)
+    {
+        buffer[i] = serial_getc();
+    }
+    return size;
+}
+
+uint32_t serial_write(vfs_node *file, uint32_t offset, uint32_t size, char *buffer)
+{
+    serial_puts(buffer);
+    serial_putc('\n');
+}
+
+void serial_open(vfs_node *file, uint32_t flags)
+{
+    printf("SERIAL opened\n");
+}
+
+void serial_close(vfs_node *file)
+{
+    printf("SERIAL closed\n");
+    kfree(file);
+}
+
+FILE* serial_getvfsnode()
+{
+    FILE* node = (FILE*)kmalloc(sizeof(FILE));
+    strcpy(node->name, "serial");
+    node->flags = FS_CHARDEVICE;
+    node->read = serial_read;
+    node->write = serial_write;
+    node->open = serial_open;
+    node->close = serial_close;
+    return node;
+}
+
 void serial_printf(char* format, ...)
 {
     va_list args;
     va_start(args, format);
     vsprintf(NULL, serial_putc, format, args);
     va_end(args);
+}
+
+bool getSerialInit()
+{
+    return isSerialInit;
 }

@@ -12,7 +12,7 @@ void* heap_max;
 bool Kheap_enabled = false;
 
 // Kernel Page Directory
-extern page_directory_t * kpage_dir;
+extern page_directory_t * kernel_page_dir;
 
 extern void * heap_start, * heap_end, * heap_max, * heap_curr;
 
@@ -51,7 +51,7 @@ uint32_t kmalloc_int(uint32_t size, int align, uint32_t* paddr)
             uint32_t t = (uint32_t)addr;
             if(align)
                 t = aligned_addr;
-            *paddr = (uint32_t)virt2phys(kpage_dir, (void*)t); // In paging
+            *paddr = (uint32_t)virt2phys(kernel_page_dir, (void*)t);
         }
 
         if(align == 1)

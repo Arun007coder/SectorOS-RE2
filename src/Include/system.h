@@ -22,7 +22,11 @@
 void panic(const char* message, const char* file, uint32_t line);
 #define PANIC(msg) panic(msg, __FILE__, __LINE__);
 
-#define CPUID(in, a, b, c, d) __asm__("cpuid": "=a"(a), "=b"(b), "=c"(c), "=d"(d) : "a"(in));
+#define PRINTBINARY(x) int i; for(i = 0; i < 32; i++) { if(x & (1 << (31 - i))) { putchar('1'); } else { putchar('0'); } }
+#define SPRINTBINARY(x) int i; for(i = 0; i < 32; i++) { if(x & (1 << (31 - i))) { serial_putc('1'); } else { serial_putc('0'); } }
+
+
+#define CPUID(in, a, b, c, d) asm("cpuid": "=a"(a), "=b"(b), "=c"(c), "=d"(d) : "a"(in));
 #ifndef KERNEL_BUILD
 #define KERNEL_BUILD "2022-01-01"
 #endif
@@ -35,11 +39,14 @@ extern uint32_t end;
 extern int paging_enabled;
 extern bool kheap_enabled;
 extern uint32_t mboot_addr;
+extern uint32_t geteip();
+
+bool isAllZero(const void* data, size_t size);
 
 #define KERNEL_BASE 0xC0000000
 #define KERNEL_END  end
 
-#define KERNEL_VERSION "2.0.0"
+#define KERNEL_VERSION "2.3.2"
 #define KERNEL_NAME "SectorOS-RE2"
 
 void print_cpuinfo();

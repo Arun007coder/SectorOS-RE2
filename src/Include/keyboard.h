@@ -14,5 +14,6 @@ typedef void (*keyboard_handler_t)(uint8_t);
 
 void init_keyboard(keyboard_handler_t handler);
 void keyboard_callback(registers_t regs);
+void change_keyboard_handler(keyboard_handler_t handler);
 
 #endif

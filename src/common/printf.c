@@ -107,8 +107,7 @@ void vsprintf(char *str, void (*putchar)(char), const char *fmt, va_list arg)
                 {
                     (*putchar)((char)va_arg(arg, int));
                 }
-            }
-                break;
+            }break;
             case 's':
             {
                 if (str)

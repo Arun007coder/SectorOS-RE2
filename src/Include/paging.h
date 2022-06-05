@@ -65,6 +65,7 @@ extern uint8_t * pmm_bitmap;
 extern uint32_t  pmm_bitmap_size;
 
 extern page_directory_t* kernel_page_dir;
+extern page_directory_t* current_directory;
 
 void* virt2phys(page_directory_t* dir, void* vaddr);
 void* d_kmalloc(uint32_t size, int align);

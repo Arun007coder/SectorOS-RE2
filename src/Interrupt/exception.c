@@ -69,6 +69,6 @@ void exception_handler(registers_t cps)
     }
     else
     {
-        printf("No interrupt handler for interrupt %d\n", cps.ino);
+        PANIC("Unhandled exception!");
     }
 }

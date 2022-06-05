@@ -10,16 +10,18 @@ Second rewrite of the SectorOS project. Written in C and assembly.
 * Vga color changing
 * IDT and GDT functional
 * Paging
-* malloc
+* Dynamic memory allocation
 * A basic shell
 * Virtual filesystem
+* EXT2 filesystem
+* Driver for AMD PCnet-FAST III
+* Semi-functional ATA driver
 
 ## TODO
 
-* Implement driver for ata, mouse and other devices
+* Implement driver for mouse and other devices
 * Implement Tasking
 * Implement Networking
-* Implement EXT2 filesystem
 * Implement ELF loader
 * etc...
 

@@ -1,2 +1,8 @@
 .vscode
 .vscode/*
+**/*.o
+*.sym
+*.img
+*.elf
+*.iso
+*.log

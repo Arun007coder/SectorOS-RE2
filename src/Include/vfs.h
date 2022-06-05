@@ -6,6 +6,7 @@
 #include "gentree.h"
 #include "printf.h"
 #include "kheap.h"
+#include "pit.h"
 
 #define PATH_SEPARATOR '/'
 #define PATH_SEPARATOR_STRING "/"
@@ -67,7 +68,7 @@ typedef struct vfs_node
     uint32_t uid;
     uint32_t gid;
     uint32_t flags;
-    uint32_t inode_count;
+    uint32_t inode_num;
     uint32_t size;
     uint32_t fs_type;
     uint32_t open_flags;
@@ -108,6 +109,8 @@ typedef struct vfs_entry
     vfs_node *file;
 }vfs_entry;
 
+typedef vfs_node FILE;
+
 uint32_t VFS_getFileSize(vfs_node *file);
 vfs_node *get_mountpoint(char **path);
 uint32_t VFS_read(vfs_node *file, uint32_t offset, uint32_t size, char *buffer);
@@ -129,7 +132,7 @@ void VFS_unlink(char *name);
 void VFS_symlink(char *name, char *target);
 int VFS_readlink(vfs_node *node, char *buffer, size_t size);
 
-void VFS_init();
+void init_vfs();
 void VFS_mount(char *path, vfs_node *local_root);
 void VFS_register_fs(char *name, vfs_mount_callback callm);
 void VFS_mountDev(char *mountpoint, vfs_node *node);

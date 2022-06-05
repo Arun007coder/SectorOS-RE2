@@ -8,7 +8,8 @@ bool kheap_enabled;
 uint8_t * temp_mem;
 int paging_enabled = 0;
 
-page_directory_t * kpage_dir;
+page_directory_t* current_directory;
+page_directory_t * kernel_page_dir;
 
 
 void* virt2phys(page_directory_t* dir, void* vaddr)
@@ -87,7 +88,7 @@ void alloc_page(page_directory_t * dir, uint32_t vaddr, uint32_t frame, int is_k
             table = kmalloc_a(sizeof(page_table_t));
 
         memset(table, 0, sizeof(page_table_t));
-        uint32_t t = (uint32_t)virt2phys(kpage_dir, table);
+        uint32_t t = (uint32_t)virt2phys(kernel_page_dir, table);
         dir->tables[page_dir_idx].frame = t >> 12;
         dir->tables[page_dir_idx].present = 1;
         dir->tables[page_dir_idx].rw = 1;
@@ -136,36 +137,37 @@ void init_paging()
 {
     temp_mem = pmm_bitmap + pmm_bitmap_size;
 
-    kpage_dir = d_kmalloc(sizeof(page_directory_t), 1);
-    memset(kpage_dir, 0, sizeof(page_directory_t));
+    kernel_page_dir = d_kmalloc(sizeof(page_directory_t), 1);
+    memset(kernel_page_dir, 0, sizeof(page_directory_t));
 
     uint32_t i = KERNEL_BASE;
     while(i < KERNEL_BASE + 4 * MB)
     {
-        alloc_page(kpage_dir, i, 0, 1, 1);
+        alloc_page(kernel_page_dir, i, 0, 1, 1);
         i = i + PAGE_SIZE;
     }
 
     i = KERNEL_BASE + 4 * MB;
     while(i < KERNEL_BASE + 4 * MB + KHEAP_INITIAL_SIZE)
     {
-        alloc_page(kpage_dir, i, 0, 1, 1);
+        alloc_page(kernel_page_dir, i, 0, 1, 1);
         i = i + PAGE_SIZE;
     }
 
     register_interrupt_handler(14, page_fault_handler);
 
-    switch_page_dir(kpage_dir, 0);
+    switch_page_dir(kernel_page_dir, 0);
 
     enable_paging();
 
-    alloc_region(kpage_dir, 0x0, 0x10000, 1, 1, 1);
+    alloc_region(kernel_page_dir, 0x0, 0x10000, 1, 1, 1);
 
     printf("Paging initialized\n");
 }
 
 void switch_page_dir(page_directory_t* dir, uint32_t paddr)
 {
+    current_directory = dir;
     uint32_t t;
     if(!paddr)
         t = (uint32_t)virt2phys(TEMP_PAGE_DIR, dir);
@@ -212,7 +214,7 @@ restart_sbrk:
             runner = heap_end;
             while(runner < new_boundary)
             {
-                alloc_page(kpage_dir, (uint32_t)runner, 0, 1, 1);
+                alloc_page(kernel_page_dir, (uint32_t)runner, 0, 1, 1);
                 runner = runner +  PAGE_SIZE;
             }
             if(old_heap_curr != heap_curr)
@@ -233,7 +235,7 @@ restart_sbrk:
         runner = heap_end - PAGE_SIZE;
         while(runner > new_boundary)
         {
-            free_page(kpage_dir, (uint32_t)runner, 1);
+            free_page(kernel_page_dir, (uint32_t)runner, 1);
             runner = runner - PAGE_SIZE;
         }
         heap_end = runner + PAGE_SIZE;
@@ -248,7 +250,7 @@ ret:
 void copy_page_dir(page_directory_t* dst, page_directory_t* src)
 {
     for(uint32_t i = 0; i < 1024; i++) {
-        if(kpage_dir->ref_tables[i] == src->ref_tables[i])
+        if(kernel_page_dir->ref_tables[i] == src->ref_tables[i])
         {
             dst->tables[i] = src->tables[i];
             dst->ref_tables[i] = src->ref_tables[i];
@@ -293,7 +295,9 @@ void page_fault_handler(registers_t regs)
 {
     printE("Page fault:\n");
     uint32_t faulting_addr;
+    uint32_t faulting_vaddr;
     asm volatile("mov %%cr2, %0" : "=r" (faulting_addr));
+    asm volatile("mov %%ebx, %0" : "=r" (faulting_vaddr));
     uint32_t present = regs.ecode & 0x1;
     uint32_t rw = regs.ecode & 0x2;
     uint32_t user = regs.ecode & 0x4;
@@ -309,5 +313,6 @@ void page_fault_handler(registers_t regs)
     printE("]\n");
 
     printE("Faulting address: 0x%x\n", faulting_addr);
+    printE("Faulting virtual address: 0x%x\n", faulting_vaddr);
     PANIC("Page fault");
 }

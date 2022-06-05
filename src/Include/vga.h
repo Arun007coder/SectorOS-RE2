@@ -3,6 +3,7 @@
 
 #include "system.h"
 #include "port.h"
+#include "vfs.h"
 
 #define VGA_FB_ADDRESS (0xB8000 + 0xC0000000)
 #define VGA_WIDTH 80

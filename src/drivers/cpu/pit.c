@@ -1,32 +1,27 @@
 #include "pit.h"
 
-static uint32_t pit_ticks = 0;
-static uint32_t pit_freq = 0;
-static uint32_t pit_freq_before = 0;
+uint32_t pit_ticks = 0;
+uint32_t pit_freq = 0;
+uint32_t pit_freq_before = 0;
 
-static uint32_t callbacks_index = 0;
-static PIT_CALLBACK callbacks[256];
+list_t* wakeup_list = NULL;
 
 void timer_callback(registers_t reg)
 {
     pit_ticks++;
     time_since_boot = pit_ticks / pit_freq;
-    if(callbacks_index > 0)
+
+    foreach(t, wakeup_list)
     {
-        for(uint32_t i = 0; i < callbacks_index; i++)
-        {
-            callbacks[i]();
-        }
+        wakeup_t* w = (wakeup_t*)t->val;
+        w->callback();
     }
 }
 
 void init_pit(uint32_t freq, isr_t callback)
 {
-    if(callback == NULL)
-    {
-        printf("No handlers given\n");
-        register_interrupt_handler(IRQ(0), &timer_callback);
-    }
+    register_interrupt_handler(IRQ(0), &timer_callback);
+    wakeup_list = list_create();
 
     chfreq(freq);
 }
@@ -41,6 +36,11 @@ void chfreq(uint32_t freq)
     outb(PIT_CHANNEL0, (uint8_t)((divisor >> 8) & 0xFF));
 }
 
+uint32_t get_freq()
+{
+    return pit_freq;
+}
+
 void wait(uint32_t ms)
 {
     uint32_t start = pit_ticks;
@@ -51,8 +51,13 @@ void wait(uint32_t ms)
     }
 }
 
-void register_function(PIT_CALLBACK callback)
+void register_function(PIT_CALLBACK callback, double seconds)
 {
-    callbacks[callbacks_index] = callback;
-    callbacks_index++;
+    uint32_t tick = pit_ticks + seconds * pit_freq;
+
+    wakeup_t* wakeup = kmalloc(sizeof(wakeup_t));
+    wakeup->callback = callback;
+    wakeup->seconds = seconds;
+    wakeup->ticks = tick;
+    list_insert_front(wakeup_list, wakeup);
 }
