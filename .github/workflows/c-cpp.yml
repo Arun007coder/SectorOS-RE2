@@ -1,4 +1,4 @@
-name: SectorOS_RE2 Build
+name: C/C++ CI
 
 on:
   workflow_dispatch:
@@ -25,3 +25,4 @@ jobs:
         path: |
           *.iso
           *.elf
+
