@@ -9,7 +9,6 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
@@ -19,7 +18,7 @@ jobs:
     - name: make all
       run: make -f src/Makefile all PREFIX="$HOME/build-i686" GRUBDIR=/usr/bin
     - name: upload_artifacts
-    - uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v3
       with:
         name: artifacts
         path: |
