@@ -20,11 +20,11 @@ jobs:
         wget https://github.com/lordmilko/i686-elf-tools/releases/download/7.1.0/i686-elf-tools-linux.zip
         unzip i686-elf-tools-linux.zip
         rm i686-elf-tools-linux.zip
-        sudo apt-get install nasm mtools xorriso
+        sudo apt-get install nasm mtools qemu-utils xorriso
         sudo apt-get install gcc-multilib
         popd
     - name: make all
-      run: make -f src/Makefile all PREFIX=/tmp/i686-elf-tools/bin/ GRUBDIR=/usr/bin/
+      run: make -f src/Makefile all mkimg addfiles PREFIX=/tmp/i686-elf-tools/bin/ GRUBDIR=/usr/bin/
     - name: upload_artifacts
       uses: actions/upload-artifact@v3
       with:
