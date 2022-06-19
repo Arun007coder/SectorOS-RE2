@@ -308,7 +308,6 @@ void read_inode_metadata(ext2_fs *fs, inode_t *inode, uint32_t inode_num)
     char *block_buf = (char *)kmalloc(fs->block_size);
     read_disk_block(fs, inode_table_block + block_offset, block_buf);
     memcpy(inode, block_buf + offset_in_block * fs->sb->inode_size, fs->sb->inode_size);
-    ext2_DebugPrintInode(inode, fs);
     kfree(block_buf);
 }
 
@@ -915,14 +914,6 @@ void EXT2_init(char *dev_path, char *mountpoint)
     read_inode_metadata(fs, root_inode, ROOT_INODE_NUMBER);
     ext2_DebugPrintInode(root_inode, fs);
     xxd(root_inode, fs->sb->inode_size);
-    char* buf = (char*)kmalloc(1024);
-    inode_t* inode = kmalloc(sizeof(inode_t));
-    read_inode_metadata(fs, inode, 13);
-    ext2_DebugPrintInode(inode, fs);
-    read_inode_filedata(fs, inode, 0, inode->size, buf);
-    xxd(buf, inode->size);
-    printf("%s\n", buf);
-    kfree(buf);
 
     VFS_mount(mountpoint, EXT2_get_root(fs, root_inode));
     printf("EXT2: Mounted %s on %s\n", dev_path, mountpoint);

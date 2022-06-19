@@ -262,6 +262,18 @@ int isspace(char c)
     return c == ' ' || c == '\t' || c == '\n' || c == '\v' || c == '\f' || c == '\r';
 }
 
+uint32_t chbc(char* str, char c)
+{
+    uint32_t i = 0;
+    while (str[i] != '\0')
+    {
+        if (str[i] == c)
+            return i;
+        i++;
+    }
+    return -1;
+}
+
 int isprint(char c)
 {
     return ((c >= ' ' && c <= '~') ? 1 : 0);

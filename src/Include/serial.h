@@ -6,6 +6,8 @@
 #include "port.h"
 #include "pit.h"
 #include "vfs.h"
+#include "devfs.h"
+#include "logdisk.h"
 
 #define COM1 0x3F8
 #define COM2 0x2F8

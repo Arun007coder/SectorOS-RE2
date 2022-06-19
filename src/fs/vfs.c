@@ -1,4 +1,5 @@
 #include "vfs.h"
+#include "logdisk.h"
 
 gentree_t *vfs_tree;
 vfs_node* vfs_root;
@@ -320,6 +321,7 @@ vfs_node *file_open(char *file_name, uint32_t flags)
 
 void init_vfs()
 {
+    printl("Initializing VFS...\n");
     vfs_tree = gentree_create();
     struct vfs_entry *root = (vfs_entry*)kmalloc(sizeof(struct vfs_entry));
     root->name = strdup("root");
@@ -327,6 +329,7 @@ void init_vfs()
     gentree_insert(vfs_tree, NULL, root);
 
     printf("Virtual FileSystem successfully initialized\n");
+    printl("Initializing VFS... done\n");
 }
 
 void VFS_mountDev(char *mountpoint, vfs_node *node)

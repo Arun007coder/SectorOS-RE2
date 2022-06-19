@@ -43,22 +43,8 @@ void shell_interpreter()
     else if (strcmp(shell_buffer, "exit") == 0)
     {
         printf("Exiting shell...\n");
+        reboot();
         return;
-    }
-    else if(strstr(shell_buffer, "fopen") != NULL)
-    {
-        char* filename = strstr(shell_buffer, "fopen") + 6;
-        filename[strlen(filename)] = '\0';
-        printf("Opening file: %s\n", filename);
-        vfs_node* node = file_open(filename, 0);
-        if(node != NULL)
-        {
-            printf("File opened successfully\n");
-        }
-        else
-        {
-            printf("File could not be opened\n");
-        }
     }
     else if(strstr(shell_buffer, "ls") != NULL)
     {
@@ -162,6 +148,15 @@ void shell_interpreter()
         {
             printf("File %s could not be opened\n", filename);
         }
+    }
+    else if (strncmp(shell_buffer, "touch", 5) == 0)
+    {
+        char* l = kmalloc(strlen(shell_buffer) - 6);
+        strcpy(l, shell_buffer + 6);
+        l[strlen(l)] = '\0';
+        VFS_create(l, 0);
+        printf("File %s created successfully\n", l);
+        kfree(l);
     }
     else if (strcmp(shell_buffer, "sysfetch") == 0)
     {

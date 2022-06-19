@@ -55,6 +55,11 @@ void ata_close(vfs_node * node)
     return;
 }
 
+void ata_stopInterrupts(ata_dev_t * dev)
+{
+    outb(dev->control, CONTROL_ZERO);
+}
+
 uint32_t ata_read(vfs_node * node, uint32_t offset, uint32_t size, char * buf)
 {
     uint32_t start = offset / SECTOR_SIZE;
@@ -162,6 +167,8 @@ void ata_write_sector(ata_dev_t * dev, uint32_t lba, char * buf)
 
 char * ata_read_sector(ata_dev_t * dev, uint32_t lba)
 {
+    while((inb(dev->status) & STATUS_BSY));
+
     char * buf = kmalloc(SECTOR_SIZE);
 
     outb(dev->BMR_COMMAND, 0);
@@ -175,6 +182,8 @@ char * ata_read_sector(ata_dev_t * dev, uint32_t lba)
     outb(dev->lba_high, (lba & 0x00ff0000) >> 16);
 
     outb(dev->command, 0xC8);
+
+    while(!(inb(dev->status) & STATUS_DRQ));
 
     outb(dev->BMR_COMMAND, 0x8 | 0x1);
 
@@ -263,7 +272,7 @@ void ata_device_detect(ata_dev_t * dev, int primary)
     outb(dev->lba_mid, 0);
     outb(dev->lba_high, 0);
 
-    outb(dev->command, COMMAND_IDENTIFY_DEVICE);
+    outb(dev->command, COMMAND_IDENTIFY);
 
     if(!inb(dev->status))
     {
@@ -302,7 +311,24 @@ void ata_device_detect(ata_dev_t * dev, int primary)
 
     printf("[ATA] Device found\n");
 
-    for(i = 0; i < 256; i++)inw(dev->data);
+    uint16_t * id = (uint16_t*)kmalloc(256);
+    memset(id, 0, 256);
+    uint8_t * id_buf = (uint8_t*)id;
+
+    for(i = 0; i < 512; i++)
+    {
+        id[i] = inw(dev->data);
+    }
+
+    char* model = (char*)kmalloc(40);
+
+    for(i = 0; i < 40; i += 2)
+    {
+        model[i] = id_buf[54 + i + 1];
+        model[i + 1] = id_buf[54 + i];
+    }
+
+    printf("[ATA] Model: %s\n", model);
 
     uint32_t pci_command_reg = pci_read(ata_device, PCI_OFF_COMMAND);
     if(!(pci_command_reg & (1 << 2)))

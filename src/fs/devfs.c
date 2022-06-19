@@ -24,7 +24,17 @@ FILE* devfs_getrootnode()
     return rnode;
 }
 
-void devfs_init()
+bool isAdded(FILE* node)
+{
+    for(int i = 0; i < num_nodes; i++)
+    {
+        if(&(nodes[i]) == node)
+            return true;
+    }
+    return false;
+}
+
+void init_devfs()
 {
     memset(nodes, 0, sizeof(FILE) * MAX_DEVICES);
     root_node = devfs_getrootnode();
@@ -33,6 +43,7 @@ void devfs_init()
         printf("Could not create root node\n");
         return;
     }
+
     VFS_mountDev("/dev/", root_node);
 }
 
@@ -41,11 +52,17 @@ void devfs_add(FILE* node)
     if (num_nodes >= MAX_DEVICES)
         return;
 
+    if(node == NULL)
+        return;
+
+    if(isAdded(node))
+        return;
+
     nodes[num_nodes] = *node;
     num_nodes++;
     char* mountpoint = (char*)kcalloc(sizeof(char), 128);
     memset(mountpoint, 0, 128);
-    strcpy(mountpoint, "/dev/");
+    strcpy(mountpoint, "/dev");
     strcat(mountpoint, "/");
     strcat(mountpoint, node->name);
     printf("Mounting on %s\n", mountpoint);
@@ -127,4 +144,9 @@ char** devfs_listdir(vfs_node* node)
 FILE* devfs_rnode()
 {
     return root_node;
+}
+
+void devfs_mount(char* mountpoint)
+{
+    VFS_mountDev(mountpoint, root_node);
 }

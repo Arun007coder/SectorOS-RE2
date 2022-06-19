@@ -46,17 +46,10 @@ int is_transmit_empty()
 
 void serial_putc(char c)
 {
-    if(isSerialInit)
-    {
-        while(is_transmit_empty() == 0);
-        if(c == '\n')
-            serial_putc('\r');
-        outb(Port, c);
-    }
-    else
-    {
-        putchar(c);
-    }
+    while(is_transmit_empty() == 0);
+    if(c == '\n')
+        serial_putc('\r');
+    outb(Port, c);
 }
 
 void serial_puts(char* str)

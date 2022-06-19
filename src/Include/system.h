@@ -20,6 +20,7 @@
 #define ASSERT(b) ((b) ? (void)0 : panic(#b, __FILE__, __LINE__))
 
 void panic(const char* message, const char* file, uint32_t line);
+void kernel_panic(const char* message);
 #define PANIC(msg) panic(msg, __FILE__, __LINE__);
 
 #define PRINTBINARY(x) int i; for(i = 0; i < 32; i++) { if(x & (1 << (31 - i))) { putchar('1'); } else { putchar('0'); } }
@@ -46,10 +47,11 @@ bool isAllZero(const void* data, size_t size);
 #define KERNEL_BASE 0xC0000000
 #define KERNEL_END  end
 
-#define KERNEL_VERSION "2.3.2"
+#define KERNEL_VERSION "3.0.0"
 #define KERNEL_NAME "SectorOS-RE2"
 
 void print_cpuinfo();
+void reboot();
 
 typedef struct CPUSTATE
 {
@@ -81,5 +83,24 @@ typedef struct registers
     uint32_t ino, ecode;
     uint32_t eip, cs, eflags, useresp, ss;
 } registers_t;
+
+typedef struct register16
+{
+    uint16_t di;
+    uint16_t si;
+    uint16_t bp;
+    uint16_t sp;
+    uint16_t bx;
+    uint16_t dx;
+    uint16_t cx;
+    uint16_t ax;
+
+    uint16_t ds;
+    uint16_t es;
+    uint16_t fs;
+    uint16_t gs;
+    uint16_t ss;
+    uint16_t eflags;
+}register16_t;
 
 #endif

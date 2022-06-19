@@ -15,7 +15,13 @@ Second rewrite of the SectorOS project. Written in C and assembly.
 * Virtual filesystem
 * EXT2 filesystem
 * Driver for AMD PCnet-FAST III
-* Semi-functional ATA driver
+* Semi-functional ATA DMA driver
+* Fully functional ATA PIO driver [will be slow]
+* Added driver for VESA graphics
+* Added Bios 32 service
+* Added Init file support
+* Added support for TGA and BMP image files
+* Added logdisk  
 
 ## TODO
 

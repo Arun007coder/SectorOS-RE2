@@ -17,7 +17,7 @@ WHT  = \x1B[37m
 CC = i686-elf-gcc
 INC = -Isrc/Include/ -I/usr/include
 GCCVERSION = $(shell echo $(CC) & $(PREFIX)$(CC) --version | grep ^gcc | sed 's/^.* //g')
-CFLAGS = $(INC) -DKERNEL_BUILD="\"$(date)\"" -DCOMPILER="\"$(GCCVERSION)\"" -nostdlib -fno-builtin -fno-exceptions -fno-leading-underscore -Wno-write-strings
+CFLAGS = $(INC) -DKERNEL_BUILD="\"$(date)\"" -DCOMPILER="\"$(GCCVERSION)\"" -nostdlib -fno-builtin -fno-exceptions -fno-leading-underscore -Wno-write-strings -Waddress-of-packed-member 
 CDFLAGS = -g
 
 LD = i686-elf-ld
@@ -28,7 +28,7 @@ AS = i686-elf-as
 ASFLAGS =
 
 ASM = nasm
-ASMFLAGS =-f elf32 -O0
+ASMFLAGS =-f elf32 -O0 -w+zeroing
 
 GRUBDIR = ~/local/bin/
 SRCDIR = src/
@@ -70,13 +70,20 @@ OBJECTS = \
 	$(SRCDIR)mem/kheap.o	\
 	$(SRCDIR)mem/paging.o	\
 	$(SRCDIR)drivers/time/rtc.o \
+	$(SRCDIR)common/bios32.o \
+	$(SRCDIR)common/bios32_helper.o \
 	$(SRCDIR)drivers/input/keyboard.o	\
 	$(SRCDIR)drivers/serial/serial.o \
 	$(SRCDIR)drivers/video/vga.o \
+	$(SRCDIR)drivers/video/vesa.o \
 	$(SRCDIR)drivers/storage/ata.o \
+	$(SRCDIR)drivers/storage/ata_pio.o \
+	$(SRCDIR)gui/bitmap.o \
+	$(SRCDIR)gui/targa.o \
 	$(SRCDIR)common/fast_memcpy.o \
 	$(SRCDIR)common/getEIP.o \
 	$(SRCDIR)common/string.o \
+	$(SRCDIR)drivers/storage/logdisk.o \
 	$(SRCDIR)common/printf.o \
 	$(SRCDIR)common/system.o \
 	$(SRCDIR)common/cpuid.o \
@@ -89,6 +96,7 @@ OBJECTS = \
 	$(SRCDIR)fs/ext2.o \
 	$(SRCDIR)fs/procfs.o \
 	$(SRCDIR)program/shell.o \
+	$(SRCDIR)program/initfile.o \
 	$(SRCDIR)Kernel/KernelMain.o \
 
 all: $(ISOIMAGE)
@@ -117,20 +125,34 @@ $(ISOIMAGE): stripd $(EXECUTABLE)
 
 iso: $(ISOIMAGE)
 
-run: $(ISOIMAGE) $(HDIMAGE)
+run: $(ISOIMAGE) $(HDIMAGE) addfiles
 	@printf '$(BLU)Running $(ISOIMAGE) using $(QEMU)...\n$(RESET)'
-	@$(QEMU) $(QEMUFLAGS) -serial stdio 2> /dev/null 
+	@$(QEMU) $(QEMUFLAGS) -serial stdio 2> /dev/null
 
-rund: $(ISOIMAGE) $(HDIMAGE)
+run_kvm: $(ISOIMAGE) $(HDIMAGE) addfiles
+	@printf '$(BLU)Running $(ISOIMAGE) using $(QEMU)...\n$(RESET)'
+	@$(QEMU) $(QEMUFLAGS) -serial stdio -enable-kvm 2> /dev/null
+
+rund: $(ISOIMAGE) $(HDIMAGE) addfiles
 	@printf '$(MAR)Running $(ISOIMAGE) using $(QEMU) with debug enabled...\n$(RESET)'
 	@$(QEMU) $(QEMUFLAGS) $(QEMUDFLAGS)
 
-runBochs: $(ISOIMAGE) $(HDIMAGE)
+runBochs: $(ISOIMAGE) $(HDIMAGE) addfiles
 	@printf '$(BLU)Running $(ISOIMAGE) using Bochs...\n$(RESET)'
 	bochs -f docs/bochsrc
 
+addfiles: $(HDIMAGE) nbdmount
+	@printf '$(BLU)Adding files to $(HDIMAGE)...\n$(RESET)'
+	@sudo mkdir -p /mnt/dev
+	@sudo cp files/* /mnt/
+	@printf '$(BLU)Files added to $(HDIMAGE)...\n$(RESET)'
+	@make -f src/Makefile nbdumount
+
 force: clean run
 forced: clean rund
+forceBochs: clean runBochs
+forceBochsd: clean rund
+forceKVM: clean run_kvm
 
 $(HDIMAGE):
 	@printf '$(BLU)Making and formatting $(HDIMAGE)...\n$(RESET)'
@@ -159,13 +181,18 @@ delimg:
 nbdmount: $(HDIMAGE)
 	@printf '$(BLU)Mounting $(HDIMAGE) using nbd...\n$(RESET)'
 	sudo modprobe nbd
+	sleep 1
+	udevadm settle
 	sudo qemu-nbd -c /dev/nbd0 $(HDIMAGE) --format raw
+	udevadm settle
 	sudo mount /dev/nbd0 /mnt
 
 nbdumount: $(HDIMAGE)
 	@printf '$(BLU)Unmounting $(HDIMAGE) using nbd...\n$(RESET)'
 	sudo umount /mnt
+	udevadm settle
 	sudo qemu-nbd -d /dev/nbd0
+	udevadm settle
 	sudo modprobe -r nbd
 
 stripd: $(EXECUTABLE)

@@ -22,9 +22,19 @@
 #define CONTROL_HIGH_ORDER_BYTE 0x80
 #define CONTROL_ZERO            0x00
 
-#define COMMAND_IDENTIFY_DEVICE 0xEC
-#define COMMAND_DMA_READ        0xC8
-#define COMMAND_READ_PIO        0x20
+#define COMMAND_READ_PIO          0x20
+#define COMMAND_READ_PIO_EXT      0x24
+#define COMMAND_DMA_READ          0xC8
+#define COMMAND_DMA_READ_EXT      0x25
+#define COMMAND_WRITE_PIO         0x30
+#define COMMAND_WRITE_PIO_EXT     0x34
+#define COMMAND_DMA_WRITE         0xCA
+#define COMMAND_DMA_WRITE_EXT     0x35
+#define COMMAND_CACHE_FLUSH       0xE7
+#define COMMAND_CACHE_FLUSH_EXT   0xEA
+#define COMMAND_PACKET            0xA0
+#define COMMAND_IDENTIFY_PACKET   0xA1
+#define COMMAND_IDENTIFY          0xEC
 
 #define STATUS_ERR  0x00
 #define STATUS_DRQ  0x08
@@ -37,12 +47,6 @@
 #define BMR_STATUS_DMA_ERROR  0x02
 #define BMR_STATUS_DMA_IRQ    0x04
 
-#define ATA_NOT_EQUALS 0x01
-#define ATA_EQUALS     0x00
-
-#define ERR_UNDETECTED 0x00
-#define ERR_DETECTED 0x01
-
 #define BMR_COMMAND_DMA_START   0x01
 #define BMR_COMMAND_DMA_STOP    0x00
 #define BMR_COMMAND_READ        0x08
@@ -52,6 +56,18 @@
 
 #define SECTOR_SIZE 512
 #define MARK_END    0x8000
+
+#define IDENT_DEVICETYPE   0
+#define IDENT_CYLINDERS    2
+#define IDENT_HEADS        6
+#define IDENT_SECTORS      12
+#define IDENT_SERIAL       20
+#define IDENT_MODEL        54
+#define IDENT_CAPABILITIES 98
+#define IDENT_FIELDVALID   106
+#define IDENT_MAX_LBA      120
+#define IDENT_COMMANDSETS  164
+#define IDENT_MAX_LBA_EXT  200
 
 extern page_directory_t *kernel_page_dir;
 

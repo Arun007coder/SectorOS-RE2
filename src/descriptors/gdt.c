@@ -4,7 +4,7 @@ extern void gdt_flush(uint32_t);
 
 void flush_gdt();
 
-gdt_entry_t gdt_entries[5];
+gdt_entry_t gdt_entries[8];
 gdt_ptr_t   gdt_ptr;
 
 void init_gdt()

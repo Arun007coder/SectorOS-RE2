@@ -1,4 +1,5 @@
 #include "printf.h"
+#include "vesa.h"
 
 int is_fmt_letter(char c)
 {
@@ -146,10 +147,16 @@ void vsprintf(char *str, void (*putchar)(char), const char *fmt, va_list arg)
 
 void printf(const char *fmt, ...)
 {
-    va_list arg;
-    va_start(arg, fmt);
-    vsprintf(NULL, putchar, fmt, arg);
-    va_end(arg);
+    if(isVesaInit())
+    {
+    }
+    else
+    {
+        va_list arg;
+        va_start(arg, fmt);
+        vsprintf(NULL, putchar, fmt, arg);
+        va_end(arg);
+    }
 }
 
 void printE(const char *fmt, ...)

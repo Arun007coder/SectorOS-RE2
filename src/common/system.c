@@ -3,6 +3,7 @@
 #include "serial.h"
 #include "vga.h"
 #include "string.h"
+#include "port.h"
 
 void panic(const char* message, const char* file, uint32_t line)
 {
@@ -20,4 +21,16 @@ bool isAllZero(const void* data, size_t size)
             return false;
     }
     return true;
+}
+
+void kernel_panic(const char* message)
+{
+    change_color(VGA_LIGHT_RED, VGA_BLACK);
+    printf("kernel panic: - %s\n", message);
+    while(1);
+}
+
+void reboot()
+{
+    outb(0x64, 0xFE);
 }

@@ -19,6 +19,8 @@ typedef struct gdt_ptr
     uint32_t base;
 }__attribute__((packed)) gdt_ptr_t;
 
+extern gdt_entry_t gdt_entries[8];
+
 void init_gdt();
 void gdt_set_gate(int32_t num, uint32_t base, uint32_t limit, uint8_t access, uint8_t gran);
 

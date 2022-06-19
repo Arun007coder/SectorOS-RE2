@@ -5,6 +5,8 @@
 #include "list.h"
 
 void fast_memcpy(char * dst, const char * src, uint32_t n);
+void fast_memset(char * dst, char c, uint32_t n);
+void fast_memset32(void *dst, uint32_t val, uint32_t n);
 
 int memcmp(uint8_t *data1, uint8_t *data2, int n);
 void *memcpy(void *dst, const void *src, int n);
@@ -36,6 +38,7 @@ char *strndup(const char *src, uint32_t len);
 char *strsep(char **stringp, const char *delim);
 
 void stoc(size_t n);
+uint32_t chbc(char* str, char c);
 
 list_t *str_split(const char *str, const char *delim, uint32_t *numtokens);
 char *list2str(list_t *list, const char *delim);

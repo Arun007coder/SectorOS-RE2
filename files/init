@@ -1,0 +1,5 @@
+echo Init File loaded
+# If you want to disable video mode comment the 3 lines below
+video 800x600x32
+BMP /wallpaper.bmp
+TGA /CC.tga

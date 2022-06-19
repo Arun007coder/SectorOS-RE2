@@ -112,7 +112,6 @@ char** procfs_list(FILE* node)
         strcpy(list[0], "kernel");
         strcpy(list[1], "pci");
         strcpy(list[2], "registers");
-        strcpy(list[3], "multiboot");
 
         return list;
     }
