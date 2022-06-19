@@ -17,7 +17,7 @@ WHT  = \x1B[37m
 CC = i686-elf-gcc
 INC = -Isrc/Include/ -I/usr/include
 GCCVERSION = $(shell echo $(CC) & $(PREFIX)$(CC) --version | grep ^gcc | sed 's/^.* //g')
-CFLAGS = $(INC) -DKERNEL_BUILD="\"$(date)\"" -DCOMPILER="\"$(GCCVERSION)\"" -nostdlib -fno-builtin -fno-exceptions -fno-leading-underscore -Wno-write-strings -Waddress-of-packed-member 
+CFLAGS = $(INC) -DKERNEL_BUILD="\"$(date)\"" -DCOMPILER="\"$(GCCVERSION)\"" -nostdlib -fno-builtin -fno-exceptions -fno-leading-underscore -Wno-write-strings
 CDFLAGS = -g
 
 LD = i686-elf-ld
