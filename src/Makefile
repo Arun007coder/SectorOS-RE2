@@ -209,7 +209,7 @@ nbdmount: nbdstart
 
 nbdstop:
 	sudo qemu-nbd -d /dev/nbd0
-	sudo modprobe -r nbd
+	sudo modprobe -r nbd || true
 	sleep 1
 	udevadm settle
 
