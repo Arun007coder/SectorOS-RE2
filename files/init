@@ -1,6 +1,5 @@
 # To print the startup message
 read /etc/startmsg
-mount /dev/apio0p1 /mnt
 # If you want to disable video mode comment the 3 lines below
 # video 800x600x32
 # BMP /wallpaper.bmp

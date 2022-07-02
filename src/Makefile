@@ -168,13 +168,12 @@ runBochs: $(ISOIMAGE) $(HDIMAGE) addfiles
 	@printf '$(BLU)Running $(ISOIMAGE) using Bochs...\n$(RESET)'
 	bochs -f docs/bochsrc
 
-addfiles: $(HDIMAGE) nbdmount $(SRCDIR)/mksorfs
+addfiles: $(HDIMAGE) nbdmount
 	@printf '$(BLU)Adding files to $(HDIMAGE)...\n$(RESET)'
 	@sudo mkdir -p /mnt/dev
 	@sudo mkdir -p /mnt/proc
 	@sudo mkdir -p /mnt/mnt
 	@./$(SCRIPTDIR)/addfiles.sh
-	./$(SCRIPTDIR)/addsorfsfiles.sh
 	@printf '$(BLU)Files added to $(HDIMAGE)...\n$(RESET)'
 	@make -f src/Makefile nbdumount
 
