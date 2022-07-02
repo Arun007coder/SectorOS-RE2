@@ -188,7 +188,6 @@ $(HDIMAGE):
 	@./$(SCRIPTDIR)/mkimg.sh
 	@make -f src/Makefile nbdstart
 	@sudo mkfs -t ext2 -i 1024 -b 1024 -F /dev/nbd0p1 2> /dev/null
-	@./$(SCRIPTDIR)/addsorfsfiles.sh
 	@make -f src/Makefile nbdstop
 
 mkimg: $(HDIMAGE)
