@@ -174,7 +174,7 @@ addfiles: $(HDIMAGE) nbdmount $(SRCDIR)/mksorfs
 	@sudo mkdir -p /mnt/proc
 	@sudo mkdir -p /mnt/mnt
 	@./$(SCRIPTDIR)/addfiles.sh
-	@./$(SCRIPTDIR)/addsorfsfiles.sh
+	./$(SCRIPTDIR)/addsorfsfiles.sh
 	@printf '$(BLU)Files added to $(HDIMAGE)...\n$(RESET)'
 	@make -f src/Makefile nbdumount
 

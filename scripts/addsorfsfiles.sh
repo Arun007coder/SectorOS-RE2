@@ -16,6 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with SectorOS-RE2.  If not, see <http://www.gnu.org/licenses/>.
 
+make -f src/Makefile src/mksorfs
 
 for i in files/sorfs/*; do
     echo Adding "$i"

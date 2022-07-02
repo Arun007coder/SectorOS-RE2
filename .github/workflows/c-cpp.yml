@@ -32,5 +32,10 @@ jobs:
         path: |
           *.iso
           *.elf
+    - name: upload_images
+      uses: actions/upload-artifact@v3
+      with:
+        name: images
+        path: |
           *.img
 
