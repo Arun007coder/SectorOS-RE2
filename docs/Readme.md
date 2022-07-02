@@ -21,14 +21,27 @@ Second rewrite of the SectorOS project. Written in C and assembly.
 * Added Bios 32 service
 * Added Init file support
 * Added support for TGA and BMP image files
-* Added logdisk  
+* Added logdisk driver
+* Added ramdisk driver
+* Added support for SORFS [SectorOS Ram File System]
+* Added MBR support
+* Added auto detection of the filesystem
+
+## Bugs
+
+* ATA DMA driver is not fully functional
+* Sometimes EXT2 filesystem only lists folders
+* SORFS is Read Only
+* OS does not work on bare-metal
 
 ## TODO
 
 * Implement driver for mouse and other devices
 * Implement Tasking
 * Implement Networking
+* Implement http server
 * Implement ELF loader
+* Make SORFS read-write
 * etc...
 
 ## Build
@@ -43,9 +56,14 @@ To build an ISO image, run the following command:
 make -f src/Makefile iso
 ```
 
-To run the project, run the following command:
+To run the project on qemu, run the following command:
 ```bash
-make -f src/Makefile run
+make -f src/Makefile runQEMU
+```
+
+To run the project on qemu KVM, run the following command:
+```bash
+make -f src/Makefile runKVM
 ```
 
 ## Resources
@@ -57,3 +75,7 @@ The resources used in this project are:
 * [JamesM's kernel development tutorials](http://www.jamesmolloy.co.uk/tutorial_html/)
 * [szhou42/osdev](https://github.com/szhou42/osdev)
 * [SectorOS](https://github.com/arun007coder/SectorOS)
+
+## License
+
+This project is licensed under the [GNU GPLv3](LICENSE).

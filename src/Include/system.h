@@ -1,3 +1,22 @@
+/**
+ * Copyright (C) 2022 Arun007coder
+ * 
+ * This file is part of SectorOS-RE2.
+ * 
+ * SectorOS-RE2 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * SectorOS-RE2 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with SectorOS-RE2.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #ifndef __SYSTEM_H__
 #define __SYSTEM_H__
 
@@ -26,10 +45,10 @@ void kernel_panic(const char* message);
 #define PRINTBINARY(x) int i; for(i = 0; i < 32; i++) { if(x & (1 << (31 - i))) { putchar('1'); } else { putchar('0'); } }
 #define SPRINTBINARY(x) int i; for(i = 0; i < 32; i++) { if(x & (1 << (31 - i))) { serial_putc('1'); } else { serial_putc('0'); } }
 
-
 #define CPUID(in, a, b, c, d) asm("cpuid": "=a"(a), "=b"(b), "=c"(c), "=d"(d) : "a"(in));
+
 #ifndef KERNEL_BUILD
-#define KERNEL_BUILD "2022-01-01"
+#define KERNEL_BUILD __DATE__ " " __TIME__
 #endif
 
 #ifndef COMPILER
@@ -47,7 +66,7 @@ bool isAllZero(const void* data, size_t size);
 #define KERNEL_BASE 0xC0000000
 #define KERNEL_END  end
 
-#define KERNEL_VERSION "3.0.0"
+#define KERNEL_VERSION "4.0.3"
 #define KERNEL_NAME "SectorOS-RE2"
 
 void print_cpuinfo();

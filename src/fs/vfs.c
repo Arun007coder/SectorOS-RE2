@@ -1,5 +1,27 @@
+/**
+ * Copyright (C) 2022 Arun007coder
+ * 
+ * This file is part of SectorOS-RE2.
+ * 
+ * SectorOS-RE2 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * SectorOS-RE2 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with SectorOS-RE2.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "vfs.h"
 #include "logdisk.h"
+
+#include "ext2.h"
+#include "sorfs.h"
 
 gentree_t *vfs_tree;
 vfs_node* vfs_root;
@@ -33,6 +55,19 @@ void VFS_db_listdir(char *name)
     }
     kfree(save);
     printf("\n");
+}
+
+char** VFS_listdir(char* path)
+{
+    vfs_node *n = file_open(path, 0);
+    if (!n)
+    {
+        printf("Could not list a directory that does not exist\n");
+        return NULL;
+    }
+    if (!n->listdir)
+        return NULL;
+    char **files = n->listdir(n);
 }
 
 void print_vfstree_recur(gentree_node_t *node, int parent_offset)
@@ -78,6 +113,25 @@ uint32_t VFS_read(vfs_node *node, uint32_t offset, uint32_t size, char *buffer)
         return ret;
     }
     return -1;
+}
+
+uint32_t find_fs(char* device)
+{
+    if(isExt2(device) == 1)
+    {
+        printf("[FS PROBER] Found EXT2 filesystem on %s\n", device);
+        return FS_TYPE_EXT2;
+    }
+    else if(isSORFS(device) == 1)
+    {
+        printf("[FS PROBER] Found SORFS filesystem on %s\n", device);
+        return FS_TYPE_SORFS;
+    }
+    else
+    {
+        printf("[FS PROBER] No filesystem found on %s\n", device);
+        return 0;
+    }
 }
 
 uint32_t VFS_write(vfs_node *file, uint32_t offset, uint32_t size, char *buffer)
@@ -392,4 +446,49 @@ void VFS_mount(char *path, vfs_node *fs_obj)
         return;
     }
     VFS_mount_recur(path + 1, vfs_tree->root, fs_obj);
+}
+
+void VFS_unmount_recur(char *path, gentree_node_t *subroot)
+{
+    int found = 0;
+    char *curr_token = strsep(&path, PATH_SEPARATOR_STRING);
+    FILE* fs_obj = NULL;
+
+    if (curr_token == NULL || !strcmp(curr_token, ""))
+    {
+        struct vfs_entry *ent = (struct vfs_entry *)subroot->data;
+        if (!strcmp(ent->name, PATH_SEPARATOR_STRING)) vfs_root = fs_obj;
+        ent->file = fs_obj;
+        return;
+    }
+
+    foreach (child, subroot->children)
+    {
+        gentree_node_t *tchild = (gentree_node_t *)child->val;
+        struct vfs_entry *ent = (struct vfs_entry *)(tchild->data);
+        if (strcmp(ent->name, curr_token) == 0)
+        {
+            found = 1;
+            subroot = tchild;
+        }
+    }
+
+    if (!found)
+    {
+        vfs_entry *ent = (vfs_entry*)kcalloc(1, sizeof(vfs_entry));
+        ent->name = strdup(curr_token);
+        subroot = gentree_insert(vfs_tree, subroot, ent);
+    }
+    VFS_unmount_recur(path, subroot);
+}
+
+void VFS_unmount(char *path)
+{
+    if (path[0] == '/' && strlen(path) == 1)
+    {
+        vfs_entry *ent = (vfs_entry *)vfs_tree->root->data;
+        ent->file = NULL;
+        return;
+    }
+    VFS_unmount_recur(path + 1, vfs_tree->root);
 }

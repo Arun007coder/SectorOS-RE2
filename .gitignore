@@ -6,3 +6,6 @@
 *.elf
 *.iso
 *.log
+
+src/mksorfs
+src/initrd

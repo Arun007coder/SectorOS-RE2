@@ -29,7 +29,8 @@ SECTIONS
 
     end = .;
 
-    /DISCARD/ : {
+    /DISCARD/ :
+    {
         *(.comment)
         *(.eh_frame)
         *(.note.gnu.build-id)

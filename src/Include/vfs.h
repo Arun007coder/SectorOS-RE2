@@ -1,3 +1,20 @@
+// Copyright (C) 2022 Arun007coder
+// 
+// This file is part of SectorOS-RE2.
+// 
+// SectorOS-RE2 is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// SectorOS-RE2 is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with SectorOS-RE2.  If not, see <http://www.gnu.org/licenses/>.
+
 #ifndef __VFS_H__
 #define __VFS_H__
 
@@ -31,6 +48,9 @@
 #define FS_PIPE 0x10
 #define FS_SYMLINK 0x20
 #define FS_MOUNTPOINT 0x40
+
+#define FS_TYPE_EXT2    0x83
+#define FS_TYPE_SORFS   0x84
 
 #define _IFMT 0170000   // type of file
 #define _IFDIR 0040000  // directory
@@ -132,12 +152,16 @@ void VFS_unlink(char *name);
 void VFS_symlink(char *name, char *target);
 int VFS_readlink(vfs_node *node, char *buffer, size_t size);
 
+uint32_t find_fs(char* device);
+
 void init_vfs();
 void VFS_mount(char *path, vfs_node *local_root);
 void VFS_register_fs(char *name, vfs_mount_callback callm);
 void VFS_mountDev(char *mountpoint, vfs_node *node);
 void print_vfs_tree();
-void VFS_listdir(char *name);
+char** VFS_listdir(char *name);
 void VFS_db_listdir(char *name);
+
+void VFS_unmount(char *path);
 
 #endif

@@ -1,3 +1,22 @@
+/**
+ * Copyright (C) 2022 Arun007coder
+ * 
+ * This file is part of SectorOS-RE2.
+ * 
+ * SectorOS-RE2 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * SectorOS-RE2 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with SectorOS-RE2.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "paging.h"
 #include "kheap.h"
 
@@ -291,18 +310,18 @@ page_table_t* copy_page_table(page_directory_t * src_page_dir, page_directory_t 
     return table;
 }
 
-void page_fault_handler(registers_t regs)
+void page_fault_handler(registers_t* regs)
 {
     printE("Page fault:\n");
     uint32_t faulting_addr;
     uint32_t faulting_vaddr;
     asm volatile("mov %%cr2, %0" : "=r" (faulting_addr));
     asm volatile("mov %%ebx, %0" : "=r" (faulting_vaddr));
-    uint32_t present = regs.ecode & 0x1;
-    uint32_t rw = regs.ecode & 0x2;
-    uint32_t user = regs.ecode & 0x4;
-    uint32_t reserved = regs.ecode & 0x8;
-    uint32_t inst_fetch = regs.ecode & 0x10;
+    uint32_t present = regs->ecode & 0x1;
+    uint32_t rw = regs->ecode & 0x2;
+    uint32_t user = regs->ecode & 0x4;
+    uint32_t reserved = regs->ecode & 0x8;
+    uint32_t inst_fetch = regs->ecode & 0x10;
 
     printE("Possible causes: [ ");
     if(!present) printE("Page not present ");

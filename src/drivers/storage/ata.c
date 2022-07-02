@@ -1,3 +1,22 @@
+/**
+ * Copyright (C) 2022 Arun007coder
+ * 
+ * This file is part of SectorOS-RE2.
+ * 
+ * SectorOS-RE2 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * SectorOS-RE2 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with SectorOS-RE2.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "ata.h"
 
 pci_t ata_device;
@@ -23,7 +42,7 @@ void soft_reset(ata_dev_t * dev)
     outb(dev->control, CONTROL_ZERO);
 }
 
-void ata_handler(registers_t reg)
+void ata_handler(registers_t* reg)
 {
     inb(primary_master.status);
     inb(primary_master.BMR_STATUS);
@@ -34,7 +53,7 @@ void ata_handler(registers_t reg)
     outb(primary_slave.BMR_COMMAND, BMR_COMMAND_DMA_STOP);
 }
 
-void ata_shandler(registers_t reg)
+void ata_shandler(registers_t *reg)
 {
     inb(secondary_master.status);
     inb(secondary_master.BMR_STATUS);
@@ -209,10 +228,7 @@ vfs_node * create_ata_device(ata_dev_t * dev)
     vfs_node * node = kcalloc(sizeof(vfs_node), 1);
     memset(node->name, 0, 256);
     strcpy(node->name, "ata");
-    char* drv = (char*)kmalloc(8);
-    itoa(drv, dev->primary, 10);
-    strcat(node->name, drv);
-    strcat(node->name, dev->slave ? "s" : "m");
+    strcat(node->name, ((dev->data == 0x1F0) ? (dev->slave ? "1" : "0") : (dev->slave ? "3" : "2")));
     node->device = dev;
     node->flags = FS_BLOCKDEVICE;
     node->read = ata_read;
@@ -337,7 +353,14 @@ void ata_device_detect(ata_dev_t * dev, int primary)
         pci_write(ata_device, PCI_OFF_COMMAND, pci_command_reg);
     }
 
-    devfs_add(create_ata_device(dev));
+    FILE* f = create_ata_device(dev);
+
+    devfs_add(f);
+    char* name = kmalloc(strlen(f->name) + 20);
+    sprintf(name, "/dev/%s", f->name);
+
+    probe_partitions(name);
+    kfree(name);
 }
 
 void init_ata()

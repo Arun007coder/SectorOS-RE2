@@ -1,3 +1,22 @@
+/**
+ * Copyright (C) 2022 Arun007coder
+ * 
+ * This file is part of SectorOS-RE2.
+ * 
+ * SectorOS-RE2 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * SectorOS-RE2 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with SectorOS-RE2.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "bitmap.h"
 
 BITMAP_t * bitmap_create(char * filename)
@@ -51,8 +70,8 @@ void bitmap_display(char* file)
 
     if(b->height > vesa_getYResolution() || b->width > vesa_getXResolution())
     {
-        serial_printf("Bitmap is too big!\n");
-        return;
+        serial_printf("Bitmap is too big! %dx%dx%d\n", b->width, b->height, b->bpp);
+        vesa_change_mode(b->width, b->height, b->bpp);
     }
 
     if(b->height < vesa_getYResolution() || b->width < vesa_getXResolution())

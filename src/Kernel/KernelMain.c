@@ -1,3 +1,22 @@
+/**
+ * Copyright (C) 2022 Arun007coder
+ * 
+ * This file is part of SectorOS-RE2.
+ * 
+ * SectorOS-RE2 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * SectorOS-RE2 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with SectorOS-RE2.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "system.h"
 #include "printf.h"
 #include "multiboot.h"
@@ -28,14 +47,29 @@
 #include "targa.h"
 #include "ata_pio.h"
 #include "initfile.h"
+#include "ramdisk.h"
+#include "sorfs.h"
+#include "mbr.h"
+#include "mount.h"
 
 uint32_t mboot_addr;
 
 void kernelmain(const multiboot_info_t* multiboot, uint32_t multiboot_m)
 {
-    mboot_addr = (uint32_t)multiboot;
     change_color(VGA_LIGHT_GREEN, VGA_BLACK);
     clear();
+
+    if(multiboot_m != MULTIBOOT_BOOTLOADER_MAGIC)
+    {
+        kernel_panic("Invalid multiboot magic number.\n");
+    }
+
+    if(isAllZero(multiboot, sizeof(multiboot_info_t)))
+    {
+        kernel_panic("Invalid multiboot info.\n");
+    }
+
+    mboot_addr = (uint32_t)multiboot;
     init_gdt();
     init_idt();
     init_pic();
@@ -44,11 +78,10 @@ void kernelmain(const multiboot_info_t* multiboot, uint32_t multiboot_m)
     init_syscall();
 
     init_pmm(1096 * MB);
-    init_kheap(KHEAP_START, KHEAP_START + KHEAP_INITIAL_SIZE, KHEAP_MAX_ADDRESS);
     init_paging();
+    init_kheap(KHEAP_START, KHEAP_START + KHEAP_INITIAL_SIZE, KHEAP_MAX_ADDRESS);
 
     init_logdisk(MB);
-
     printl("GDT initialized.\n");
     printl("IDT initialized.\n");
     printl("PIC initialized.\n");
@@ -63,21 +96,17 @@ void kernelmain(const multiboot_info_t* multiboot, uint32_t multiboot_m)
     init_vfs();
 
     init_procfs();
-
     printl("PROCFS initialized.\n");
 
     init_devfs();
-
     printl("DEVFS initialized. Mounted on /dev/\n");
 
     logdisk_mount();
 
     init_shell();
-
     printl("Shell initialized.\n");
 
     init_pit(SECOND, NULL);
-
     printl("PIT initialized.\n");
 
     enable_interrupts();
@@ -101,28 +130,22 @@ void kernelmain(const multiboot_info_t* multiboot, uint32_t multiboot_m)
     devfs_add(se);
 
     init_ata_pio();
+    init_ata();
 
     printl("ATA initialized.\n");
-    EXT2_init("/dev/apio0m", "/");
-    printl("EXT2 initialized. Mounted on \"/\"\n");
 
     uint8_t second, minute, hour, day, month;
     uint32_t year;
     rtc_read(&second, &minute, &hour, &day, &month, &year);
     printf("%d/%d/%d %d:%d:%d\n", month, day, year, hour, minute, second);
 
-    printl("Kernel Successfully Initialized.\n");
-
-    printf("Welcome to %s!\n", KERNEL_NAME);
-    printf("Type \"help\" for a list of commands.\n\n");
-
-    printf("/#> ");
+    mount("/dev/apio0p0", "/");
 
     load_initfile();
 
-    //init_vesa();
-    //bitmap_display("/wallpaper.bmp");
-    //printf("Hello, world!\n");
+    printl("Kernel Successfully Initialized.\n");
+
+    printf("/#> ");
 
     while(1);
 }

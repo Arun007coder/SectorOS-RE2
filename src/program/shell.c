@@ -1,3 +1,22 @@
+/**
+ * Copyright (C) 2022 Arun007coder
+ * 
+ * This file is part of SectorOS-RE2.
+ * 
+ * SectorOS-RE2 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * SectorOS-RE2 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with SectorOS-RE2.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "shell.h"
 #include "keyboard.h"
 
@@ -27,6 +46,22 @@ void shell_interpreter()
         printf("\t- Prints the contents of the given file\n");
         printf("write [Filename] [Content]:\n");
         printf("\t- Writes the given content to the given file\n");
+        printf("mount [Device filename] [mountpoint]:\n");
+        printf("\t- Mounts the given device to the given mountpoint\n");
+        printf("unmount [mountpoint]:\n");
+        printf("\t- Unmounts the given mountpoint\n");
+        printf("touch [Filename]:\n");
+        printf("\t- Creates a new file\n");
+        printf("time:\n");
+        printf("\t- Prints the ticks since boot\n");
+        printf("license:\n");
+        printf("\t- Prints the license\n");
+        printf("exit:\n");
+        printf("\t- resets the system\n");
+        printf("crdsk [Filename]:\n");
+        printf("\t- Creates a ramdisk\n");
+        printf("del [Filename]:\n");
+        printf("\t- Deletes a file\n");
     }
     else if (strcmp(shell_buffer, "clear") == 0)
     {
@@ -72,6 +107,60 @@ void shell_interpreter()
             strcpy(curr_dir, filename);
         }
     }
+    else if(shell_buffer[0] == 'm' && shell_buffer[1] == 'o' && shell_buffer[2] == 'u' && shell_buffer[3] == 'n' && shell_buffer[4] == 't')
+    {
+        uint32_t n;
+        char* arg = strdup(shell_buffer + 6);
+        list_t* args = str_split(arg, " ", &n);
+
+        char* mountpoint = list_pop(args)->val;
+        char* devpath = list_pop(args)->val;
+
+        mount(devpath, mountpoint);
+    }
+    else if(shell_buffer[0] == 'l' && shell_buffer[1] == 'i' && shell_buffer[2] == 'c' && shell_buffer[3] == 'e' && shell_buffer[4] == 'n' && shell_buffer[5] == 'c' && shell_buffer[6] == 'e')
+    {
+        printf("Licence: GPLv3\n");
+        printf("Copyright (C) 2022 Arun007coder\n");
+    }
+    else if(shell_buffer[0] == 'c' && shell_buffer[1] == 'r' && shell_buffer[2] == 'd' && shell_buffer[3] == 's' && shell_buffer[4] == 'k')
+    {
+        char* filename = kmalloc(strlen(shell_buffer) - 6 );
+
+        for(uint8_t i = 6; i < strlen(shell_buffer); i++)
+        {
+            filename[i - 6] = shell_buffer[i];
+        }
+
+        filename[strlen(shell_buffer) - 6] = '\0';
+
+        printf("Creating ramdisk from: %s\n", filename);
+
+        ramdisk_createFromFile(filename);
+    }
+    else if(shell_buffer[0] == 'd' && shell_buffer[1] == 'e' && shell_buffer[2] == 'l')
+    {
+        char* filename = kmalloc(strlen(shell_buffer) - 4 );
+
+        for(uint8_t i = 4; i < strlen(shell_buffer); i++)
+        {
+            filename[i - 4] = shell_buffer[i];
+        }
+
+        filename[strlen(shell_buffer) - 4] = '\0';
+
+        VFS_unlink(filename);
+    }
+    else if(shell_buffer[0] == 'u' && shell_buffer[1] == 'n' && shell_buffer[2] == 'm' && shell_buffer[3] == 'o' && shell_buffer[4] == 'u' && shell_buffer[5] == 'n')
+    {
+        uint32_t n;
+        char* arg = strdup(shell_buffer + 7);
+        list_t* args = str_split(arg, " ", &n);
+
+        char* mountpoint = list_pop(args)->val;
+
+        VFS_unmount(mountpoint);
+    }
     else if(strstr(shell_buffer, "cat") != NULL)
     {
         char* filename = strstr(shell_buffer, "cat") + 4;
@@ -102,7 +191,7 @@ void shell_interpreter()
         }
         else
         {
-            printf("File could not be opened\n");
+            printf("File %s could not be opened\n", filename);
         }
     }
     else if(shell_buffer[0] == 'w' && shell_buffer[1] == 'r' && shell_buffer[2] == 'i' && shell_buffer[3] == 't' && shell_buffer[4] == 'e')
@@ -157,6 +246,37 @@ void shell_interpreter()
         VFS_create(l, 0);
         printf("File %s created successfully\n", l);
         kfree(l);
+    }
+    else if(shell_buffer[0] == 'u' && shell_buffer[1] == 'n' && shell_buffer[2] == 'a' && shell_buffer[3] == 'm' && shell_buffer[4] == 'e')
+    {
+        char* arg = strdup(shell_buffer + 6);
+        if(arg[0] != '-')
+        {
+            printf("%s version %s %s x86\n", KERNEL_NAME, KERNEL_VERSION, KERNEL_BUILD);
+        }
+        else
+        {
+            if(arg[1] == 'a')
+            {
+                printf("%s version %s %s x86\n", KERNEL_NAME, KERNEL_VERSION, KERNEL_BUILD);
+            }
+            else if(arg[1] == 'n')
+            {
+                printf("%s\n", KERNEL_NAME);
+            }
+            else if(arg[1] == 'b')
+            {
+                printf("%s\n", KERNEL_BUILD);
+            }
+            else if(arg[1] == 'v')
+            {
+                printf("%s\n", KERNEL_VERSION);
+            }
+            else if(arg[1] == 'h')
+            {
+                printf("Usage: uname [-anbvh]\n");
+            }
+        }
     }
     else if (strcmp(shell_buffer, "sysfetch") == 0)
     {

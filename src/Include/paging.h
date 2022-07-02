@@ -1,3 +1,20 @@
+// Copyright (C) 2022 Arun007coder
+// 
+// This file is part of SectorOS-RE2.
+// 
+// SectorOS-RE2 is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// SectorOS-RE2 is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with SectorOS-RE2.  If not, see <http://www.gnu.org/licenses/>.
+
 #ifndef __PAGING_H_
 #define __PAGING_H_
 
@@ -87,6 +104,6 @@ void* ksbrk(uint32_t size);
 void copy_page_dir(page_directory_t* dest, page_directory_t* src);
 page_table_t* copy_page_table(page_directory_t * src_page_dir, page_directory_t * dst_page_dir, uint32_t page_dir_idx, page_table_t * src);
 
-void page_fault_handler(registers_t regs);
+void page_fault_handler(registers_t* regs);
 
 #endif

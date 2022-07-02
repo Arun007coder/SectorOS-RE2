@@ -1,3 +1,22 @@
+/**
+ * Copyright (C) 2022 Arun007coder
+ * 
+ * This file is part of SectorOS-RE2.
+ * 
+ * SectorOS-RE2 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * SectorOS-RE2 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with SectorOS-RE2.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "ata_pio.h"
 
 ata_pio_t ap0m;
@@ -5,7 +24,7 @@ ata_pio_t ap0s;
 ata_pio_t ap1m;
 ata_pio_t ap1s;
 
-void ata_pio_handler(registers_t reg)
+void ata_pio_handler(registers_t* reg)
 {
 }
 
@@ -123,16 +142,18 @@ void ata_pio_identify(ata_pio_t* ap)
     printl("[ATA PIO] Size: %dB\n", ap->size);
     printl("[ATA PIO] Signature: 0x%x\n", ap->signature);
 
-    devfs_add(ata_pio_GetVFSNode(ap));
+    FILE* f = ata_pio_GetVFSNode(ap);
+
+    devfs_add(f);
+    char* name = kmalloc(strlen(f->name) + 20);
+    sprintf(name, "/dev/%s", f->name);
+
+    probe_partitions(name);
+    kfree(name);
 }
 
 void ata_pio_Read28(ata_pio_t* ap, uint32_t lba, uint8_t* buffer, int count)
 {
-    if (lba & 0xF0000000)
-        return;
-    if (count > ap->bytesPerSector)
-        return;
-
     outb(ap->devicePort, ap->master ? 0xE0 : 0xF0 |  ((lba & 0x0F000000) >> 24));
     outb(ap->errorPort, 0);
 
@@ -166,11 +187,6 @@ void ata_pio_Read28(ata_pio_t* ap, uint32_t lba, uint8_t* buffer, int count)
 
 void ata_pio_Write28(ata_pio_t* ap, uint32_t lba, uint8_t* buffer, int count)
 {
-    if (lba & 0xF0000000)
-        return;
-    if (count > ap->bytesPerSector)
-        return;
-
     outb(ap->devicePort, ap->master ? 0xE0 : 0xF0 |  ((lba & 0x0F000000) >> 24));
     outb(ap->errorPort, 0);
 
@@ -324,8 +340,7 @@ FILE* ata_pio_GetVFSNode(ata_pio_t* ap)
     f->close = ata_pio_close;
     f->size = ap->size;
     strcpy(f->name, "apio");
-    strcat(f->name, (ap->basePort == 0x1F0) ? "0" : "1");
-    strcat(f->name, (ap->master) ? "m" : "s");
+    strcat(f->name, ((ap->basePort == 0x1F0) ? (ap->master ? "0" : "1") : (ap->master ? "2" : "3")));
     f->flags = FS_BLOCKDEVICE;
     return f;
 }

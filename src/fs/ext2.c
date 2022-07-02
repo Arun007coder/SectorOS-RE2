@@ -1,3 +1,22 @@
+/**
+ * Copyright (C) 2022 Arun007coder
+ * 
+ * This file is part of SectorOS-RE2.
+ * 
+ * SectorOS-RE2 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * SectorOS-RE2 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with SectorOS-RE2.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "ext2.h"
 
 uint32_t EXT2_getFileSize(vfs_node *node)
@@ -871,8 +890,30 @@ void ext2_DebugPrintSB(ext2_fs* ext2fs)
     serial_printf("Max mount count: %d\n", ext2fs->sb->max_mnt_count);
     serial_printf("Magic: %d [%s]\n", ext2fs->sb->magic, (ext2fs->sb->magic == VFS_EXT2_MAGIC) ? "OK" : "FAIL");
     serial_printf("State: %d [%s]\n", ext2fs->sb->state);
-    serial_printf("Errors: %d [%s]\n", ext2fs->sb->errors, (ext2fs->sb->errors == 0) ? "OK" : "FAIL");
+    serial_printf("Errors: %d [%s]\n", ext2fs->sb->errors, (ext2fs->sb->errors == 0) ? "OK" : (ext2fs->sb->errors == 1) ? "IGNORED" : (ext2fs->sb->errors == 2) ? "REMOUNT RO" : "KERNEL PANIC");
     serial_printf("Last mount dir: %s\n", ext2fs->sb->last_mounted);
+}
+
+int isExt2(char* devpath)
+{
+    ext2_fs *fs = (ext2_fs *)kcalloc(sizeof(ext2_fs), 1);
+    fs->device = file_open(devpath, 0);
+
+    fs->sb = (superblock*)kmalloc(SUPERBLOCK_SIZE);
+
+    fs->block_size = 1024;
+
+    read_disk_block(fs, 1, (char *)fs->sb);
+    if(fs->sb->magic != VFS_EXT2_MAGIC)
+    {
+        kfree(fs);
+        return 0;
+    }
+
+    VFS_close(fs->device);
+
+    kfree(fs);
+    return 1;
 }
 
 void EXT2_init(char *dev_path, char *mountpoint)
@@ -917,4 +958,5 @@ void EXT2_init(char *dev_path, char *mountpoint)
 
     VFS_mount(mountpoint, EXT2_get_root(fs, root_inode));
     printf("EXT2: Mounted %s on %s\n", dev_path, mountpoint);
+    return;
 }
