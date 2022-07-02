@@ -168,7 +168,7 @@ runBochs: $(ISOIMAGE) $(HDIMAGE) addfiles
 	@printf '$(BLU)Running $(ISOIMAGE) using Bochs...\n$(RESET)'
 	bochs -f docs/bochsrc
 
-addfiles: $(HDIMAGE) nbdmount mksorfs
+addfiles: $(HDIMAGE) nbdmount $(SRCDIR)/mksorfs
 	@printf '$(BLU)Adding files to $(HDIMAGE)...\n$(RESET)'
 	@sudo mkdir -p /mnt/dev
 	@sudo mkdir -p /mnt/proc
