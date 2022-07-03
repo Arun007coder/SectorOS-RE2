@@ -26,6 +26,7 @@ Second rewrite of the SectorOS project. Written in C and assembly.
 * Added support for SORFS [SectorOS Ram File System]
 * Added MBR support
 * Added auto detection of the filesystem
+* Implemented usermode support
 
 ## Bugs
 
@@ -78,4 +79,4 @@ The resources used in this project are:
 
 ## License
 
-This project is licensed under the [GNU GPLv3](LICENSE).
+This project is licensed under the [GNU GPLv3](../LICENSE).

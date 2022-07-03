@@ -83,6 +83,8 @@ OBJECTS = \
 	$(SRCDIR)/Interrupt/syscall.o	\
 	$(SRCDIR)/descriptors/idt_helper.o	\
 	$(SRCDIR)/descriptors/idt.o	\
+	$(SRCDIR)/descriptors/tss.o	\
+	$(SRCDIR)/descriptors/tss_helper.o	\
 	$(SRCDIR)/hardcom/port.o \
 	$(SRCDIR)/hardcom/mmio.o \
 	$(SRCDIR)/drivers/pci.o \
@@ -121,6 +123,7 @@ OBJECTS = \
 	$(SRCDIR)/fs/mount.o \
 	$(SRCDIR)/program/shell.o \
 	$(SRCDIR)/program/initfile.o \
+	$(SRCDIR)/process/usermode.o \
 	$(SRCDIR)/Kernel/KernelMain.o \
 
 all: $(ISOIMAGE)

@@ -20,6 +20,10 @@
 
 #include "system.h"
 
+#define GDT_ENTRY_COUNT 6
+
+#define GDT_GET_USER_SELECTOR(idx) (idx | 0x03)
+
 typedef struct gdt_entry
 {
     uint16_t limit_low;
@@ -36,7 +40,7 @@ typedef struct gdt_ptr
     uint32_t base;
 }__attribute__((packed)) gdt_ptr_t;
 
-extern gdt_entry_t gdt_entries[8];
+extern gdt_entry_t gdt_entries[GDT_ENTRY_COUNT];
 
 void init_gdt();
 void gdt_set_gate(int32_t num, uint32_t base, uint32_t limit, uint8_t access, uint8_t gran);

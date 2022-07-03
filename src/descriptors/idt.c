@@ -81,7 +81,7 @@ void init_idt()
     set_idt_gate(46, (uint32_t)irq14, 0x08, 0x8E);
     set_idt_gate(47, (uint32_t)irq15, 0x08, 0x8E);
 
-    set_idt_gate(128, (uint32_t)exception128, 0x08, 0x8E);
+    set_idt_gate(128, (uint32_t)exception128, 0x08, (0x8E | 0x60));
 
     idt_flush((uint32_t)&idt_ptr);
 }

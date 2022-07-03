@@ -51,8 +51,24 @@
 #include "sorfs.h"
 #include "mbr.h"
 #include "mount.h"
+#include "tss.h"
+#include "usermode.h"
 
 uint32_t mboot_addr;
+
+void usermode_putchar(char c)
+{
+    asm volatile("int $0x80" : : "a"(0x00), "b"(c));
+}
+
+void usermode_puts(const char* str)
+{
+    while(*str)
+    {
+        usermode_putchar(*str);
+        str++;
+    }
+}
 
 void kernelmain(const multiboot_info_t* multiboot, uint32_t multiboot_m)
 {
@@ -71,6 +87,9 @@ void kernelmain(const multiboot_info_t* multiboot, uint32_t multiboot_m)
 
     mboot_addr = (uint32_t)multiboot;
     init_gdt();
+
+    init_tss(5, 0x10, 0);
+
     init_idt();
     init_pic();
     init_bios32();
@@ -146,6 +165,16 @@ void kernelmain(const multiboot_info_t* multiboot, uint32_t multiboot_m)
     printl("Kernel Successfully Initialized.\n");
 
     printf("/#> ");
+
+    uint32_t esp = (uint32_t)kmalloc(0x1000);
+    printf("ESP: 0x%08x\n", esp);
+
+    tss_set_kernel_stack(0x10, esp);
+
+    printf("switching to usermode...\n");
+    switch_to_usermode();
+
+    usermode_puts("Hello from userspace!\n");
 
     while(1);
 }

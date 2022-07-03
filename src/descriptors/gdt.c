@@ -23,19 +23,19 @@ extern void gdt_flush(uint32_t);
 
 void flush_gdt();
 
-gdt_entry_t gdt_entries[8];
+gdt_entry_t gdt_entries[GDT_ENTRY_COUNT];
 gdt_ptr_t   gdt_ptr;
 
 void init_gdt()
 {
-    gdt_ptr.limit = sizeof(gdt_entry_t) * 5 - 1;
+    gdt_ptr.limit = sizeof(gdt_entry_t) * GDT_ENTRY_COUNT - 1;
     gdt_ptr.base  = (uint32_t)&gdt_entries;
 
-    gdt_set_gate(0, 0, 0, 0, 0);                // Null segment
-    gdt_set_gate(1, 0, 0xFFFFFFFF, 0x9A, 0xCF); // Code segment
-    gdt_set_gate(2, 0, 0xFFFFFFFF, 0x92, 0xCF); // Data segment
-    gdt_set_gate(3, 0, 0xFFFFFFFF, 0xFA, 0xCF); // User mode code segment
-    gdt_set_gate(4, 0, 0xFFFFFFFF, 0xF2, 0xCF); // User mode data segment
+    gdt_set_gate(0, 0, 0, 0, 0);                // 0x00: Null segment
+    gdt_set_gate(1, 0, 0xFFFFFFFF, 0x9A, 0xCF); // 0x08: Code segment
+    gdt_set_gate(2, 0, 0xFFFFFFFF, 0x92, 0xCF); // 0x10: Data segment
+    gdt_set_gate(3, 0, 0xFFFFFFFF, 0xFA, 0xCF); // 0x18: User mode code segment
+    gdt_set_gate(4, 0, 0xFFFFFFFF, 0xF2, 0xCF); // 0x20: User mode data segment
 
     gdt_flush((uint32_t)&gdt_ptr);
 }
