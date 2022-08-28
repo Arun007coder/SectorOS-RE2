@@ -18,6 +18,7 @@
  */
 
 #include "initfile.h"
+#include "dhcp.h"
 
 void load_init(char* path)
 {
@@ -175,6 +176,10 @@ void load_init(char* path)
 
 void load_initfile(void)
 {
+    asm volatile("int $0x80" :: "a"(0x09));
+    int isFork;
+    asm volatile("mov %%eax, %0" : "=r"(isFork));
+
     list_t *initfile_list = list_create();
 
     FILE* f = file_open(INITFILE_PATH, 0);
@@ -207,8 +212,8 @@ void load_initfile(void)
             uint32_t height = atoi(list_pop(args2)->val);
             uint32_t width = atoi(list_pop(args2)->val);
 
-            init_vesa();
             vesa_change_mode(width, height, bpp);
+
         }
         else if(strcmp(cmd, "EXT2") == 0)
         {
@@ -249,6 +254,133 @@ void load_initfile(void)
         {
             char* path = list_pop(args)->val;
             VFS_unmount(path);
+        }
+        else if(strcmp(cmd, "hostname") == 0)
+        {
+            char* hostname = list_pop(args)->val;
+            setHostName(hostname);
+        }
+        else if(strcmp(cmd, "ip") == 0)
+        {
+            uint8_t ip[4];
+            ip[3] = atoi(list_pop(args)->val);
+            ip[2] = atoi(list_pop(args)->val);
+            ip[1] = atoi(list_pop(args)->val);
+            ip[0] = atoi(list_pop(args)->val);
+            char* arg1 = list_pop(args)->val;
+
+            if(strcmp(arg1, "dhcp") == 0)
+            {
+                dhcp_discover();
+            }
+            else if(strcmp(arg1, "static") == 0)
+            {
+                setStaticIP(ip);
+            }
+        }
+        else if(strcmp(cmd, "netinterface") == 0)
+        {
+            char* arg1 = list_pop(args)->val;
+
+            if(strcmp(arg1, "on") == 0)
+            {
+                changeNetworkState(true);
+            }
+            else if(strcmp(arg1, "off") == 0)
+            {
+                changeNetworkState(false);
+            }
+            else
+            {
+                printf("[init] Invalid option %s for netinterface command!\n", arg1);
+                printl("[init] Invalid option %s for netinterface command!\n", arg1);
+            }
+        }
+        else if(strcmp(cmd, "udpsend") == 0)
+        {
+            char* payload = list_pop(args)->val;
+            payload[strlen(payload)] = '\0';
+            char* dstIP = list_pop(args)->val;
+            list_t* ip_list = str_split(dstIP, ".", NULL);
+            uint16_t dstPort = atoi(list_pop(args)->val);
+            uint16_t srcPort = atoi(list_pop(args)->val);
+
+            uint8_t ip[4];
+
+            int i = 0;
+            foreach(t, ip_list)
+            {
+                char* ipp = t->val;
+                ip[i] = atoi(ipp);
+                i++;
+            }
+
+            while(isIPReady() == 0);
+            udp_send_packet(ip, srcPort, dstPort, payload, strlen(payload));
+        }
+        else if(strcmp(cmd, "ping") == 0)
+        {
+            char* dstIP = list_pop(args)->val;
+            list_t* ip_list = str_split(dstIP, ".", NULL);
+
+            uint8_t ip[4];
+
+            int i = 0;
+            foreach(t, ip_list)
+            {
+                char* ipp = t->val;
+                ip[i] = atoi(ipp);
+                i++;
+            }
+
+            while(isIPReady() == 0);
+
+            request_echo_reply(ip);
+        }
+        else if(strcmp(cmd, "init") == 0)
+        {
+            char* arg1 = list_pop(args)->val;
+            if(strcmp(arg1, "shell") == 0)
+            {
+                init_shell();
+            }
+            else if(strcmp(arg1, "arp") == 0)
+            {
+                init_arp();
+            }
+            else if(strcmp(arg1, "dhcp") == 0)
+            {
+                init_dhcp();
+            }
+            else if(strcmp(arg1, "udp") == 0)
+            {
+                init_udp();
+            }
+            else
+            {
+                printf("[INIT] unknown option %s.", arg1);
+            }
+        }
+        else if(strcmp(cmd, "power") == 0)
+        {
+            char* arg1 = list_pop(args)->val;
+            if(strcmp(arg1, "off") == 0)
+            {
+                apm_shutdown();
+            }
+            else if(strcmp(arg1, "reboot") == 0)
+            {
+                reboot();
+            }
+            else
+            {
+                reboot();
+            }
+        }
+        else if(strcmp(cmd, "switch") == 0)
+        {
+            int interfacenum = atoi(list_pop(args)->val);
+            switch_interface(interfacenum);
         }
         else if(strcmp(cmd, "read") == 0)
         {
@@ -294,6 +426,20 @@ void load_initfile(void)
             }
             printf("\n");
         }
+        else if(strcmp(cmd, "execC") == 0)
+        {
+            char* path = list_pop(args)->val;
+            printf("[InitFile] Executing %s...\n", path);
+
+            if(isFork == 0)
+            {
+                asm volatile("int $0x80" :: "a"(0x08));
+            }
+            else
+            {
+                printf("Forked...\n");
+            }
+        }
         else if(strcmp(cmd, "#") == 0)
         {
             continue;
@@ -303,4 +449,5 @@ void load_initfile(void)
             printf("[initfile] Unknown command: %s\n", cmd);
         }
     }
+
 }

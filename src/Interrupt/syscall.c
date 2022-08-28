@@ -18,21 +18,41 @@
  */
 
 #include "syscall.h"
+#include "vesa.h"
+
+void * syscall_table[10] = {
+    putchar,
+    printf,
+    VFS_create,
+    vesa_change_mode,
+    file_open,
+    VFS_close,
+    VFS_read,
+    VFS_write,
+    VFS_getFileSize,
+    malloc,
+};
 
 void syscall_handler(registers_t *reg)
 {
-    switch(reg->eax)
-    {
-    case 0:
-        putchar(reg->ebx);
-        break;
-    case 1:
-        printf("%s", (char*)reg->ebx);
-        break;
-    case 2:
-        beep(1000, 100);
-        break;
-    }
+    if(reg->eax >= 20) return;
+    void * system_api = syscall_table[reg->eax];
+    int ret;
+    asm volatile (" \
+    push %1; \
+    push %2; \
+    push %3; \
+    push %4; \
+    push %5; \
+    call *%6; \
+    pop %%ebx; \
+    pop %%ebx; \
+    pop %%ebx; \
+    pop %%ebx; \
+    pop %%ebx; \
+    " : "=a" (ret) : "r" (reg->edi), "r" (reg->esi), "r" (reg->edx), "r" (reg->ecx), "r" (reg->ebx), "r" (system_api));
+
+    reg->eax = ret;
 }
 
 void init_syscall()

@@ -30,6 +30,7 @@
 #define MB (1024*KB)
 #define GB (1024*MB)
 
+
 #define MSECOND 1
 #define SECOND 1000*MSECOND
 #define MINUTE 60*SECOND
@@ -60,17 +61,21 @@ extern int paging_enabled;
 extern bool kheap_enabled;
 extern uint32_t mboot_addr;
 extern uint32_t geteip();
+extern uint32_t tick_before;
 
 bool isAllZero(const void* data, size_t size);
 
 #define KERNEL_BASE 0xC0000000
 #define KERNEL_END  end
 
-#define KERNEL_VERSION "4.1.2"
+#define KERNEL_VERSION "5.0.0"
 #define KERNEL_NAME "SectorOS-RE2"
+
+#define SOSH_VERSION "0.1.8"
 
 void print_cpuinfo();
 void reboot();
+void print_eflags(uint32_t eflags);
 
 typedef struct CPUSTATE
 {
@@ -121,5 +126,9 @@ typedef struct register16
     uint16_t ss;
     uint16_t eflags;
 }register16_t;
+
+uint16_t register_hl(uint8_t high, uint8_t low);
+uint8_t register_h(uint16_t reg);
+uint8_t register_l(uint16_t reg);
 
 #endif

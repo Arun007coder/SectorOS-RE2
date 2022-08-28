@@ -115,47 +115,46 @@ void EXT2_unlink(vfs_node *parent, char *name)
 
 char **EXT2_listdir(vfs_node *parent)
 {
-    ext2_fs *fs = (ext2_fs *)parent->device;
-    inode_t *p_inode = (inode_t *)kmalloc(sizeof(inode_t));
-    read_inode_metadata(fs, p_inode, parent->inode_num);
-    uint32_t c_off = 0;
+    ext2_fs * ext2fs = parent->device;
+    inode_t * p_inode = kmalloc(sizeof(inode_t));
+    read_inode_metadata(ext2fs, p_inode, parent->inode_num);
+    uint32_t curr_offset = 0;
     uint32_t block_offset = 0;
     uint32_t in_block_offset = 0;
     int size = 0, cap = 10;
-    char **res = (char **)kmalloc(sizeof(char *) * cap);
-    char *block_buf = read_inode_block(fs, p_inode, block_offset);
-    while (c_off < p_inode->size)
+    char ** ret = kmalloc(sizeof(char*) * cap);
+    char * block_buf = read_inode_block(ext2fs, p_inode, block_offset);
+    while(curr_offset < p_inode->size)
     {
-        if (in_block_offset >= fs->block_size)
+        if(in_block_offset >= ext2fs->block_size)
         {
             block_offset++;
             in_block_offset = 0;
-            block_buf = read_inode_block(fs, p_inode, block_offset);
+            block_buf = read_inode_block(ext2fs, p_inode, block_offset);
         }
-        if (size + 1 == cap)
+        if(size + 1 == cap)
         {
-            res = (char **)krealloc(res, sizeof(char *) * cap * 2);
+            ret = krealloc(ret, sizeof(char*) * cap * 2);
             cap = cap * 2;
         }
 
-        Dirent *c_dir = (Dirent *)(block_buf + in_block_offset);
-        if (c_dir->inode != 0)
-        {
-            char *temp = (char *)kcalloc(c_dir->name_len + 1, 1);
-            memcpy(temp, c_dir->name, c_dir->name_len);
-            res[size++] = temp;
+        Dirent * curr_dir = (Dirent*)(block_buf + in_block_offset);
+        if(curr_dir->inode != 0) {
+            char * temp = kcalloc(curr_dir->name_len + 1, 1);
+            memcpy(temp, curr_dir->name, curr_dir->name_len);
+            ret[size++] = temp;
         }
-        uint32_t expected_size = ((sizeof(Dirent) + c_dir->name_len) & 0xfffffffc) + 0x4;
-        uint32_t real_size = c_dir->rec_len;
-        if (real_size != expected_size)
+        uint32_t expected_size = ((sizeof(Dirent) + curr_dir->name_len) & 0xfffffffc) + 0x4;
+        uint32_t real_size = curr_dir->rec_len;
+        if(real_size != expected_size)
         {
             break;
         }
-        in_block_offset += c_dir->rec_len;
-        c_off += c_dir->rec_len;
+        in_block_offset += curr_dir->rec_len;
+        curr_offset += curr_dir->rec_len;
     }
-    res[size] = NULL;
-    return res;
+    ret[size] = NULL;
+    return ret;
 }
 
 void EXT2_chmod(vfs_node *node, uint32_t mode)

@@ -333,5 +333,5 @@ void page_fault_handler(registers_t* regs)
 
     printE("Faulting address: 0x%x\n", faulting_addr);
     printE("Faulting virtual address: 0x%x\n", faulting_vaddr);
-    PANIC("Page fault");
+    kernel_panic("Page fault");
 }

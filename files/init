@@ -1,6 +1,18 @@
-# To print the startup message
-read /etc/startmsg
 # If you want to disable video mode comment the 3 lines below
 # video 800x600x32
-# BMP /wallpaper.bmp
+# BMP /wallpaper2.
+hostname SectorOS_RE2
+# If you want to enable the network change off to on in the line below and uncomment the 5 lines below
+netinterface off
+# switch 0
+# init arp
+# init udp
+# init dhcp
+# ip dhcp 0 0 0 0
+# If you want a static ip then uncomment the below line
+# ip static 192 168 1 15
 # TGA /mnt/CC.tga
+# ping 192.168.1.1
+init shell
+# To print the startup message
+read /etc/startmsg

@@ -18,6 +18,7 @@
  */
 
 #include "ata.h"
+#include "mbr.h"
 
 pci_t ata_device;
 
@@ -365,6 +366,12 @@ void ata_device_detect(ata_dev_t * dev, int primary)
 
 void init_ata()
 {
+    if(pci_isDeviceAvailable(ATA_PCI_VENDOR_ID, ATA_PCI_DEVICE_ID) == 0) // Not found
+    {
+        printf("[ATA] Device not found\n");
+        return;
+    }
+
     ata_device = pci_get_device(ATA_PCI_VENDOR_ID, ATA_PCI_DEVICE_ID, -1);
 
     register_interrupt_handler(IRQ(14), ata_handler);

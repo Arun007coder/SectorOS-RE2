@@ -31,7 +31,7 @@
 #define PIT_CHANNEL2 0x42
 #define PIT_COMMAND 0x43
 
-typedef void (*PIT_CALLBACK)(void);
+typedef void (*wakeup_callback)(void);
 
 extern uint32_t pit_ticks;
 extern uint32_t pit_freq;
@@ -40,15 +40,15 @@ static uint32_t time_since_boot;
 
 typedef struct 
 {
-    PIT_CALLBACK callback;
+    wakeup_callback callback;
     double seconds;
     uint32_t ticks;
-}wakeup_t;
+}wakeup_info_t;
 
 void init_pit(uint32_t frequency, isr_t callback);
 void chfreq(uint32_t freq);
 uint32_t get_freq();
 void wait(uint32_t ms);
-void register_function(PIT_CALLBACK callback, double seconds);
+void register_function(wakeup_callback callback, double seconds);
 
 #endif

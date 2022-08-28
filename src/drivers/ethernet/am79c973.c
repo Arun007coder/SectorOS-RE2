@@ -18,8 +18,12 @@
  */
 
 #include "am79c973.h"
+#include "netinterface.h"
+#include "ethernet.h"
 
 static AM79C_dev_t* dev;
+
+int isAM79CInit = 0;
 
 void AM97C_ISR(registers_t *r)
 {
@@ -44,7 +48,7 @@ void AM97C_ISR(registers_t *r)
     }
     if((temp & AM79C_RECV) == AM79C_RECV)
     {
-        AM97C_receive();
+        AM79C_receive();
     }
     if((temp & AM79C_SENT) == AM79C_SENT)
     {
@@ -63,109 +67,133 @@ void AM97C_ISR(registers_t *r)
 void init_AM79C()
 {
     asm("cli");
-    pci_t pci_dev = pci_get_device(AM79C_VENDORID, AM79C_DEVICEID, -1);
 
-    dev = (AM79C_dev_t*)kmalloc(sizeof(AM79C_dev_t));
-    memset(dev, 0, sizeof(AM79C_dev_t));
-
-    for(int i = 0; i < 6; i++)
+    if(pci_isDeviceAvailable(AM79C_VENDORID, AM79C_DEVICEID) == 0) // Not Found
     {
-        uint32_t bar_val = pci_read(pci_dev, 0x10 + 4*i);
-        if(BAR_IO_GETADDR(bar_val) && (BAR_TYPE(bar_val) == PCI_DEVTYPE_IO))
+        printf("[AM79C973] Device did not found\n");
+        asm("sti");
+        return;
+    }
+
+    if(isAM79CInit == 0)
+    {
+        pci_t pci_dev = pci_get_device(AM79C_VENDORID, AM79C_DEVICEID, -1);
+
+        dev = (AM79C_dev_t*)kmalloc(sizeof(AM79C_dev_t));
+        memset(dev, 0, sizeof(AM79C_dev_t));
+
+        for(int i = 0; i < 6; i++)
         {
-            dev->portBase = (uint32_t)BAR_IO_GETADDR(bar_val);
-            break;
+            uint32_t bar_val = pci_read(pci_dev, 0x10 + 4*i);
+            if(BAR_IO_GETADDR(bar_val) && (BAR_TYPE(bar_val) == PCI_DEVTYPE_IO))
+            {
+                dev->portBase = (uint32_t)BAR_IO_GETADDR(bar_val);
+                break;
+            }
         }
+
+        dev->MACAddressPort0    = dev->portBase;
+        dev->MACAddressPort2    = (dev->portBase + 0x02);
+        dev->MACAddressPort4    = (dev->portBase + 0x04);
+        dev->registerDataPort   = (dev->portBase + 0x10);
+        dev->registerAddrPort   = (dev->portBase + 0x12);
+        dev->resetPort          = (dev->portBase + 0x14);
+        dev->busCTRLRegisterData= (dev->portBase + 0x16);
+
+        dev->interrupt = pci_read(pci_dev, PCI_OFF_INTERRUPT_LINE);
+
+        dev->currentSendBuffer = 0;
+        dev->currentRecvBuffer = 0;
+
+        uint64_t MAC0 = inw(dev->MACAddressPort0) % 256;
+        uint64_t MAC1 = inw(dev->MACAddressPort0) / 256;
+        uint64_t MAC2 = inw(dev->MACAddressPort2) % 256;
+        uint64_t MAC3 = inw(dev->MACAddressPort2) / 256;
+        uint64_t MAC4 = inw(dev->MACAddressPort4) % 256;
+        uint64_t MAC5 = inw(dev->MACAddressPort4) / 256;
+
+        uint64_t MAC = MAC5 << 40 | MAC4 << 32 | MAC3 << 24 | MAC2 << 16 | MAC1 << 8 | MAC0;
+
+        outw(dev->registerAddrPort, 0x14);
+        outw(dev->busCTRLRegisterData, 0x102);
+
+        outw(dev->registerAddrPort, 0);
+        outw(dev->registerDataPort, 0x04);
+
+        dev->initblock.mode             = 0x0000;
+        dev->initblock.reserved1        = 0;
+        dev->initblock.numSendBuffers   = 3;
+        dev->initblock.reserved2        = 0;
+        dev->initblock.numRecBuffers    = 3;
+        dev->initblock.physicalAddress  = MAC;
+        dev->initblock.reserved3        = 0;
+        dev->initblock.logical_address  = 0;
+
+        dev->sendBufferDescr = (AM79C_BD_t*)((((uint32_t)&dev->sendBufferDescrMem[0]) + 15) & ~((uint32_t)0x0F));
+        dev->initblock.SendBufferDescrAddress = (uint32_t)dev->sendBufferDescr;
+        dev->recvBufferDescr = (AM79C_BD_t*)((((uint32_t)&dev->recvBufferDescrMemory[0]) + 15) & ~((uint32_t)0x0F));
+        dev->initblock.RecBufferDescrAddress = (uint32_t)dev->recvBufferDescr;
+
+        for (uint8_t i = 0; i < 8; i++)
+        {
+            dev->sendBufferDescr[i].address = (((uint32_t)&dev->sendBuffers[i]) + 15) & ~(uint32_t)0x0F;
+            dev->sendBufferDescr[i].flags = 0x7FF | 0xF000;
+            dev->sendBufferDescr[i].flags2 = 0;
+            dev->sendBufferDescr[i].avail = 0;
+
+            dev->recvBufferDescr[i].address = (((uint32_t)&dev->recvBuffers[i]) + 15) & ~(uint32_t)0x0F;
+            dev->recvBufferDescr[i].flags = 0xF7FF | 0x80000000;
+            dev->recvBufferDescr[i].flags2 = 0;
+            dev->sendBufferDescr[i].avail = 0;
+        }
+
+        outw(dev->registerAddrPort, 1);
+        outw(dev->registerDataPort, (uint32_t)(&dev->initblock) & 0xFFFF);
+        outw(dev->registerAddrPort, 2);
+        outw(dev->registerDataPort, ((uint32_t)(&dev->initblock) >> 16) & 0xFFFF);
+
+        outw(dev->registerAddrPort, 0);
+        outw(dev->registerDataPort, 0x41);
+
+        outw(dev->registerAddrPort, 4);
+        uint32_t temp = inw(dev->registerDataPort);
+        outw(dev->registerAddrPort, 4);
+        outw(dev->registerDataPort, (temp | 0xC00));
+
+        outw(dev->registerAddrPort, 0);
+        outw(dev->registerDataPort, 0x42);
+
+        register_interrupt_handler(0x20 + dev->interrupt, AM97C_ISR);
+
+        net_t* interface = kcalloc(sizeof(net_t), 1);
+        interface->IUID = AM79C973_IUID;
+        interface->send = AM79C_send;
+        interface->getip = AM97C_GetIPAddress;
+        interface->getmac = AM97C_GetMACAddr;
+        interface->setip = AM97C_SetIPAddress;
+
+        register_network_interface(interface);
+
+        printf("AM79C973: Activated\n");
+
+        isAM79CInit = 1;
+        asm("sti");
     }
-
-    dev->MACAddressPort0    = dev->portBase;
-    dev->MACAddressPort2    = (dev->portBase + 0x02);
-    dev->MACAddressPort4    = (dev->portBase + 0x04);
-    dev->registerDataPort   = (dev->portBase + 0x10);
-    dev->registerAddrPort   = (dev->portBase + 0x12);
-    dev->resetPort          = (dev->portBase + 0x14);
-    dev->busCTRLRegisterData= (dev->portBase + 0x16);
-
-    dev->interrupt = pci_read(pci_dev, PCI_OFF_INTERRUPT_LINE);
-
-    dev->currentSendBuffer = 0;
-    dev->currentRecvBuffer = 0;
-
-    uint64_t MAC0 = inw(dev->MACAddressPort0) % 256;
-    uint64_t MAC1 = inw(dev->MACAddressPort0) / 256;
-    uint64_t MAC2 = inw(dev->MACAddressPort2) % 256;
-    uint64_t MAC3 = inw(dev->MACAddressPort2) / 256;
-    uint64_t MAC4 = inw(dev->MACAddressPort4) % 256;
-    uint64_t MAC5 = inw(dev->MACAddressPort4) / 256;
-
-    uint64_t MAC = MAC5 << 40 | MAC4 << 32 | MAC3 << 24 | MAC2 << 16 | MAC1 << 8 | MAC0;
-
-    outw(dev->registerAddrPort, 0x14);
-    outw(dev->busCTRLRegisterData, 0x102);
-
-    outw(dev->registerAddrPort, 0);
-    outw(dev->registerDataPort, 0x04);
-
-    dev->initblock.mode             = 0x0000;
-    dev->initblock.reserved1        = 0;
-    dev->initblock.numSendBuffers   = 3;
-    dev->initblock.reserved2        = 0;
-    dev->initblock.numRecBuffers    = 3;
-    dev->initblock.physicalAddress  = MAC;
-    dev->initblock.reserved3        = 0;
-    dev->initblock.logical_address  = 0;
-
-    dev->sendBufferDescr = (AM79C_BD_t*)((((uint32_t)&dev->sendBufferDescrMem[0]) + 15) & ~((uint32_t)0x0F));
-    dev->initblock.SendBufferDescrAddress = (uint32_t)dev->sendBufferDescr;
-    dev->recvBufferDescr = (AM79C_BD_t*)((((uint32_t)&dev->recvBufferDescrMemory[0]) + 15) & ~((uint32_t)0x0F));
-    dev->initblock.RecBufferDescrAddress = (uint32_t)dev->recvBufferDescr;
-
-    for (uint8_t i = 0; i < 8; i++)
+    else
     {
-        dev->sendBufferDescr[i].address = (((uint32_t)&dev->sendBuffers[i]) + 15) & ~(uint32_t)0x0F;
-        dev->sendBufferDescr[i].flags = 0x7FF | 0xF000;
-        dev->sendBufferDescr[i].flags2 = 0;
-        dev->sendBufferDescr[i].avail = 0;
-
-        dev->recvBufferDescr[i].address = (((uint32_t)&dev->recvBuffers[i]) + 15) & ~(uint32_t)0x0F;
-        dev->recvBufferDescr[i].flags = 0xF7FF | 0x80000000;
-        dev->recvBufferDescr[i].flags2 = 0;
-        dev->sendBufferDescr[i].avail = 0;
+        return;
     }
-
-    outw(dev->registerAddrPort, 1);
-    outw(dev->registerDataPort, (uint32_t)(&dev->initblock) & 0xFFFF);
-    outw(dev->registerAddrPort, 2);
-    outw(dev->registerDataPort, ((uint32_t)(&dev->initblock) >> 16) & 0xFFFF);
-
-    outw(dev->registerAddrPort, 0);
-    outw(dev->registerDataPort, 0x41);
-
-    outw(dev->registerAddrPort, 4);
-    uint32_t temp = inw(dev->registerDataPort);
-    outw(dev->registerAddrPort, 4);
-    outw(dev->registerDataPort, (temp | 0xC00));
-
-    outw(dev->registerAddrPort, 0);
-    outw(dev->registerDataPort, 0x42);
-
-    register_interrupt_handler(0x20 + dev->interrupt, AM97C_ISR);
-
-    printf("AM79C973: Activated\n");
-
-    asm("sti");
 }
 
-int AM79C_reset()
+void AM79C_reset()
 {
     inw(dev->resetPort);
     outw(dev->resetPort, 0x42);
 
     printf("AM79C973: Reset\n");
-    return 10;
 }
 
-void AM79C_send(uint8_t* buffer, int count)
+void AM79C_send(void* buffer, uint32_t count)
 {
     int sendDescriptor = dev->currentSendBuffer;
 
@@ -179,18 +207,6 @@ void AM79C_send(uint8_t* buffer, int count)
         *dst = *src;
     }
 
-    printf("SEND:\n");
-    for (int i = 0; i < (count > 64 ? 64 : count); i++)
-    {
-        printf("%02x ", buffer[i]);
-    }
-    printf("\n");
-
-    /*
-    printf("Dump of the current send buffer:\n");
-    xxd(buffer, count);
-    */
-
     dev->sendBufferDescr[sendDescriptor].avail = 0;
     dev->sendBufferDescr[sendDescriptor].flags2 = 0;
     dev->sendBufferDescr[sendDescriptor].flags = 0x8300F000 | ((uint16_t)((-count) & 0xFFF));
@@ -198,7 +214,7 @@ void AM79C_send(uint8_t* buffer, int count)
     outw(dev->registerDataPort, 0x48);
 }
 
-void AM97C_receive()
+void AM79C_receive()
 {
 
     printf("AM79C973: Receiving data\n");
@@ -218,23 +234,14 @@ void AM97C_receive()
             }
             printf("\n");
 
-            if(dev->onReciveHandler != 0)
-            {
-                if(dev->onReciveHandler(buffer, size))
-                {
-                    AM79C_send(buffer, size);
-                }
-            }
+            etherframe_t* packet = (etherframe_t*)buffer;
+
+            interface_receive(packet, size);
         }
 
         dev->recvBufferDescr[dev->currentRecvBuffer].flags2 = 0;
         dev->recvBufferDescr[dev->currentRecvBuffer].flags = 0x8000F7FF;
     }
-}
-
-void AM97C_SetHandler(AM79C_OnReceive_handler_t onrec)
-{
-    dev->onReciveHandler = onrec;
 }
 
 uint64_t AM97C_GetMACAddr()

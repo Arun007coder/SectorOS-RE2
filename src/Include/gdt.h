@@ -20,7 +20,7 @@
 
 #include "system.h"
 
-#define GDT_ENTRY_COUNT 6
+#define GDT_ENTRY_COUNT 8
 
 #define GDT_GET_USER_SELECTOR(idx) (idx | 0x03)
 

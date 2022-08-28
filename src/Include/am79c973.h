@@ -94,22 +94,18 @@ typedef struct AM79C_dev
     uint8_t recvBuffers[2 * 1024 + 15][8];
     uint8_t currentRecvBuffer;
 
-    AM79C_OnReceive_handler_t onReciveHandler;
-
 }AM79C_dev_t;
 
 void init_AM79C();
 
-void AM79C_send(uint8_t* buffer, int count);
-void AM97C_receive();
+void AM79C_send(void* buffer, uint32_t count);
+void AM79C_receive();
 
-int AM97C_reset();
+void AM79C_reset();
 
 uint64_t AM97C_GetMACAddr();
 
 void AM97C_SetIPAddress(uint32_t ip);
 uint32_t AM97C_GetIPAddress();
-
-void AM97C_SetHandler(AM79C_OnReceive_handler_t onrec);
 
 #endif

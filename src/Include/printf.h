@@ -26,4 +26,6 @@ void vsprintf(char *buf, void (*putchar)(char), const char *fmt, va_list args);
 void printf(const char *fmt, ...);
 void printE(const char *fmt, ...);
 
+int is_fmt_letter(char c);
+
 #endif

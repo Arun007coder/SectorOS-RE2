@@ -62,7 +62,7 @@ bios32_helper: use32
     lgdt [REBASE(asm_gdt_ptr)]
 
     lidt [REBASE(asm_idt_ptr)]
-   
+
     jmp CODE16:REBASE(protected_mode_16)
 
 protected_mode_16:use16

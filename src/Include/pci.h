@@ -101,4 +101,6 @@ pci_t pci_get_device(uint16_t vendor_id, uint16_t device_id, int device_type);
 void enumerate_pci_devices();
 void procfs_enumerate_pci_devices(char* buffer);
 
+int pci_isDeviceAvailable(uint16_t vendor_id, uint16_t device_id);
+
 #endif

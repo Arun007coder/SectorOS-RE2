@@ -162,7 +162,6 @@ bool DeviceHasFunctions(pci_t dev)
 	return pci_read(dev, PCI_OFF_HEADER_TYPE) & (1<<7);
 }
 
-
 void identify_pci_device(pci_t dev)
 {
 	switch(pci_read(dev, PCI_OFF_CLASS))
@@ -210,6 +209,7 @@ void identify_pci_device(pci_t dev)
 			{
 				case 0x2000:
 					printf("PCnet-FAST III ");
+					init_AM79C();
 					break;
 				default:
 					break;
@@ -244,6 +244,19 @@ void identify_pci_device(pci_t dev)
 			{
 				case 0x1100:
 					printf("QEMU Virtual Machine ");
+					break;
+				default:
+					break;
+			};
+		}break;
+		case 0x10EC: // Realtek
+		{
+			printf("Realtek ");
+			switch(pci_read(dev, PCI_OFF_DEVICE_ID))
+			{
+				case 0x8139:
+					printf("RTL8139 ");
+					init_rtl8139();
 					break;
 				default:
 					break;
@@ -334,6 +347,21 @@ void proc_identify_pci_device(pci_t dev, char* buf)
 			strcat(buf, "Red Hat ");
 			switch(pci_read(dev, PCI_OFF_DEVICE_ID))
 			{
+				case 0x1100:
+					strcat(buf, "QEMU Virtual Machine ");
+					break;
+				default:
+					break;
+			};
+		}break;
+		case 0x10EC: // Realtek
+		{
+			strcat(buf, "Realtek ");
+			switch(pci_read(dev, PCI_OFF_DEVICE_ID))
+			{
+				case 0x8139:
+					strcat(buf, "RTL8139 ");
+					break;
 				default:
 					break;
 			};
@@ -344,96 +372,6 @@ void proc_identify_pci_device(pci_t dev, char* buf)
 	strcat(buf, "\n");
 }
 
-void serial_identify_pci_device(pci_t dev)
-{
-	switch(pci_read(dev, PCI_OFF_CLASS))
-	{
-		case 0x01:
-		{
-			serial_printf("Storage "); // Mass Storage Controller
-		}break;
-		case 0x02:
-		{
-			serial_printf("Network "); // Network Controller
-		}break;
-		case 0x03:
-		{
-			serial_printf("Graphics "); // Video Controller
-			switch(pci_read(dev, PCI_OFF_SUBCLASS))
-			{
-				case 0x00:
-					serial_printf("VGA ");
-					break;
-				default:
-					break;
-			};
-		}break;
-		case 0x04:
-		{
-			serial_printf("Multimedia "); // Audio Controller
-		}break;
-		case 0x05:
-		{
-			serial_printf("Memory "); // Memory Controller
-		}break;
-		case 0x06:
-		{
-			serial_printf("Bridge "); // Bridge Device
-		}break;
-	};
-
-	switch(pci_read(dev, PCI_OFF_VENDOR_ID))
-	{
-		case 0x1022: // AMD
-		{
-			serial_printf("AMD ");
-			switch (pci_read(dev, PCI_OFF_DEVICE_ID))
-			{
-				case 0x2000:
-					serial_printf("PCnet-FAST III ");
-					break;
-				default:
-					break;
-			};
-		}break;
-		case 0x8086: // Intel
-		{
-			serial_printf("Intel ");
-			switch(pci_read(dev, PCI_OFF_DEVICE_ID))
-			{
-				case 0x100E:
-					serial_printf("82579LM Gigabit Ethernet ");
-					break;
-				case 0x1237:
-					serial_printf("440FX - 82441FX PMC ");
-					break;
-				case 0x7000:
-					serial_printf("82371SB PIIX3 ISA ");
-					break;
-				case 0x7010:
-					serial_printf("82371SB PIIX3 IDE ");
-					break;
-				default:
-					break;
-			};
-		}break;
-		case 0x1AF4: // Red Hat
-		{
-			serial_printf("Red Hat ");
-			switch(pci_read(dev, PCI_OFF_DEVICE_ID))
-			{
-				case 0x1100:
-					serial_printf("QEMU Virtual Machine ");
-					break;
-				default:
-					break;
-			};
-		}break;
-		default:
-			break;
-	};
-	serial_printf("\n");
-}
 
 void enumerate_pci_devices()
 {
@@ -519,4 +457,20 @@ void init_pci()
 	printf("PCI successfully initialized\n");
 	printf("Enumerating PCI devices: \n");
     enumerate_pci_devices();
+}
+
+// Finds if the device with given vendor id and device id is present in the pci bus
+// @return 0 if not found 1 if found
+int pci_isDeviceAvailable(uint16_t vendor_id, uint16_t device_id)
+{
+	pci_t t = pci_get_device(vendor_id, device_id, -1);
+
+	if(isAllZero(&t, sizeof(pci_t)))
+	{
+		return 0;
+	}
+	else
+	{
+		return 1;
+	}
 }

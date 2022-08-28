@@ -118,6 +118,8 @@ FILE* serial_getvfsnode()
     return node;
 }
 
+
+
 void serial_printf(char* format, ...)
 {
     va_list args;

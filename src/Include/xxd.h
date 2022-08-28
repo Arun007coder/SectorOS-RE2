@@ -31,5 +31,7 @@
 * @param size size of the variable
 */
 void xxd(void* ptr, uint32_t size);
+void xxdf(void* ptr, uint32_t size);
+void xxdl(void* ptr, uint32_t size);
 
 #endif

@@ -28,11 +28,11 @@ list_t* wakeup_list = NULL;
 void timer_callback(registers_t *reg)
 {
     pit_ticks++;
-    time_since_boot = pit_ticks / pit_freq;
+    time_since_boot = pit_ticks * pit_freq;
 
     foreach(t, wakeup_list)
     {
-        wakeup_t* w = (wakeup_t*)t->val;
+        wakeup_info_t* w = (wakeup_info_t*)t->val;
         w->callback();
     }
 }
@@ -70,11 +70,11 @@ void wait(uint32_t ms)
     }
 }
 
-void register_function(PIT_CALLBACK callback, double seconds)
+void register_function(wakeup_callback callback, double seconds)
 {
     uint32_t tick = pit_ticks + seconds * pit_freq;
 
-    wakeup_t* wakeup = kmalloc(sizeof(wakeup_t));
+    wakeup_info_t* wakeup = kmalloc(sizeof(wakeup_info_t));
     wakeup->callback = callback;
     wakeup->seconds = seconds;
     wakeup->ticks = tick;

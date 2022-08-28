@@ -19,6 +19,7 @@
 
 #include "shell.h"
 #include "keyboard.h"
+#include "apm.h"
 
 char shell_buffer[SHELL_BUFFER_SIZE];
 uint8_t shell_buffer_index = 0;
@@ -62,6 +63,20 @@ void shell_interpreter()
         printf("\t- Creates a ramdisk\n");
         printf("del [Filename]:\n");
         printf("\t- Deletes a file\n");
+        printf("uname [-anbvh]:\n");
+        printf("\t-Prints about the kernel\n");
+        printf("rand:\n");
+        printf("\t-Prints a random number\n");
+    }
+    else if(strcmp(shell_buffer, "shutdown") == 0 || strcmp(shell_buffer, "sd") == 0)
+    {
+        printf("Shutting down...\n");
+        apm_shutdown();
+    }
+    else if(strcmp(shell_buffer, "reboot") == 0 || strcmp(shell_buffer, "rb") == 0)
+    {
+        printf("Rebooting...\n");
+        reboot();
     }
     else if (strcmp(shell_buffer, "clear") == 0)
     {
@@ -278,6 +293,10 @@ void shell_interpreter()
             }
         }
     }
+    else if (strcmp(shell_buffer, "rand") == 0)
+    {
+        printf("%d\n", abs(rand()));
+    }
     else if (strcmp(shell_buffer, "sysfetch") == 0)
     {
         printf("OS: %s\n", KERNEL_NAME);
@@ -288,12 +307,10 @@ void shell_interpreter()
         printf("pageing is %s\n", (paging_enabled) ? "enabled" : "disabled");
         printf("builded on %s using %s\n", KERNEL_BUILD, COMPILER);
         printf("Resolution: %dx%d\n", VGA_WIDTH, VGA_HEIGHT);
-        printf("Shell: %s\n", "sosh 0.1.2");
+        printf("Shell: %s\n", SOSH_VERSION);
         print_cpuinfo();
         multiboot_info_t* mboot = (multiboot_info_t*)mboot_addr;
-        printf("Memory: ");
-        stoc((mboot->mem_upper * 1024) + (mboot->mem_lower * 1024));
-        printf("\n");
+        printf("Memory: %s\n", stoc_r((mboot->mem_upper * 1024) + (mboot->mem_lower * 1024)));
 
         printf("\n");
         for (uint8_t i = 0; i < 32; i++)

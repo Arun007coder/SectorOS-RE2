@@ -18,6 +18,7 @@
  */
 
 #include "gdt.h"
+#include "tss.h"
 
 extern void gdt_flush(uint32_t);
 
@@ -38,6 +39,8 @@ void init_gdt()
     gdt_set_gate(4, 0, 0xFFFFFFFF, 0xF2, 0xCF); // 0x20: User mode data segment
 
     gdt_flush((uint32_t)&gdt_ptr);
+
+    init_tss(5, 0x10, 0);
 }
 
 void gdt_set_gate(int32_t num, uint32_t base, uint32_t limit, uint8_t access, uint8_t gran)

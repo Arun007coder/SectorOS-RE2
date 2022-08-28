@@ -65,8 +65,11 @@ ISOIMAGE = $(PROJECT).iso
 HDIMAGE = ext2_hda.img
 
 QEMU = qemu-system-i386
-QEMUFLAGS = -kernel $(EXECUTABLE) -m 1024 -drive file=$(HDIMAGE),media=disk,index=0,format=raw
+QEMUFLAGS = -kernel $(EXECUTABLE) -m 2048 -drive file=$(HDIMAGE),media=disk,index=0,format=raw -netdev tap,id=mynet0,ifname=tap0,script=no,downscript=no -device rtl8139,netdev=mynet0,mac=52:55:00:d1:55:01
+
 QEMUDFLAGS = -serial file:serial.log -s -S -daemonize
+
+NETWORK_INTERFACE = enp2s0
 
 OBJECTS = \
 	$(SRCDIR)/multiboot.o \
@@ -75,6 +78,7 @@ OBJECTS = \
 	$(SRCDIR)/descriptors/gdt.o	\
 	$(SRCDIR)/drivers/cpu/pic.o	\
 	$(SRCDIR)/drivers/cpu/pit.o	\
+	$(SRCDIR)/drivers/cpu/apm.o	\
 	$(SRCDIR)/drivers/sound/beeper.o	\
 	$(SRCDIR)/Interrupt/exception_helper.o	\
 	$(SRCDIR)/Interrupt/exception.o	\
@@ -93,6 +97,7 @@ OBJECTS = \
 	$(SRCDIR)/mem/paging.o	\
 	$(SRCDIR)/drivers/time/rtc.o \
 	$(SRCDIR)/common/bios32.o \
+	$(SRCDIR)/common/math.o \
 	$(SRCDIR)/common/bios32_helper.o \
 	$(SRCDIR)/drivers/input/keyboard.o	\
 	$(SRCDIR)/drivers/serial/serial.o \
@@ -107,12 +112,15 @@ OBJECTS = \
 	$(SRCDIR)/common/string.o \
 	$(SRCDIR)/drivers/storage/logdisk.o \
 	$(SRCDIR)/drivers/storage/ramdisk.o \
+	$(SRCDIR)/drivers/storage/nulldev.o \
+	$(SRCDIR)/drivers/storage/randomdev.o \
 	$(SRCDIR)/common/printf.o \
 	$(SRCDIR)/common/system.o \
 	$(SRCDIR)/common/cpuid.o \
 	$(SRCDIR)/common/structures/list.o \
 	$(SRCDIR)/common/structures/gentree.o \
 	$(SRCDIR)/drivers/ethernet/am79c973.o \
+	$(SRCDIR)/drivers/ethernet/rtl8139.o \
 	$(SRCDIR)/common/debugutils/xxd.o \
 	$(SRCDIR)/fs/vfs.o \
 	$(SRCDIR)/fs/devfs.o \
@@ -121,9 +129,21 @@ OBJECTS = \
 	$(SRCDIR)/fs/sorfs.o \
 	$(SRCDIR)/fs/mbr.o \
 	$(SRCDIR)/fs/mount.o \
+	$(SRCDIR)/network/netutils.o \
+	$(SRCDIR)/network/netinterface.o \
+	$(SRCDIR)/network/ethernet.o \
+	$(SRCDIR)/network/arp.o \
+	$(SRCDIR)/network/ipv4.o \
+	$(SRCDIR)/network/icmp.o \
+	$(SRCDIR)/network/udp.o \
+	$(SRCDIR)/network/dhcp.o \
 	$(SRCDIR)/program/shell.o \
 	$(SRCDIR)/program/initfile.o \
 	$(SRCDIR)/process/usermode.o \
+	$(SRCDIR)/gui/blend.o \
+	$(SRCDIR)/gui/draw.o \
+	$(SRCDIR)/gui/font/font.o \
+	$(SRCDIR)/gui/font/font_parser.o \
 	$(SRCDIR)/Kernel/KernelMain.o \
 
 all: $(ISOIMAGE)
@@ -137,6 +157,37 @@ $(EXECUTABLE): $(OBJECTS)
 	@printf '$(BLU)Kernel surcessfully builded. kernel can be found in $(shell pwd)/$(EXECUTABLE)...\n$(RESET)'
 
 kernel: $(EXECUTABLE)
+
+setupTAP:
+	@printf '$(BLU)Setting up tap\n$(RESET)'
+	@sudo brctl addbr br0
+	@sudo ip addr flush dev $(NETWORK_INTERFACE)
+	@sudo brctl addif br0 $(NETWORK_INTERFACE)
+	@sudo tunctl -t tap0 -u `whoami`
+	@sudo brctl addif br0 tap0
+	@sudo ifconfig $(NETWORK_INTERFACE) up
+	@sudo ifconfig tap0 up
+	@sudo ifconfig br0 up
+	@sudo dhclient -v br0
+
+stopTAP:
+	@sudo brctl delif br0 tap0
+	@sudo tunctl -d tap0
+	@sudo brctl delif br0 $(NETWORK_INTERFACE)
+	@sudo ifconfig br0 down
+	@sudo brctl delbr br0
+	@sudo ifconfig $(NETWORK_INTERFACE) up
+	@sudo dhclient -v $(NETWORK_INTERFACE)
+
+stopTAP1:
+	@sudo ifconfig br0 down
+	@sudo brctl delbr br0
+	@sudo ifconfig $(NETWORK_INTERFACE) up
+	@sudo dhclient -v $(NETWORK_INTERFACE)
+
+wireshark:
+	@printf '$(BLU)Starting wireshark\n$(RESET)'
+	@sudo wireshark -k -i tap0 &
 
 $(ISOIMAGE): stripd $(EXECUTABLE)
 	@printf '$(CYN)[GRUB] Building ISO image...$(RESET)\n'
@@ -157,15 +208,15 @@ iso: $(ISOIMAGE)
 
 run: $(ISOIMAGE) $(HDIMAGE) addfiles
 	@printf '$(BLU)Running $(ISOIMAGE) using $(QEMU)...\n$(RESET)'
-	@$(QEMU) $(QEMUFLAGS) -serial stdio 2> /dev/null
+	@sudo $(QEMU) $(QEMUFLAGS) -serial stdio 2> /dev/null
 
 runKVM: $(ISOIMAGE) $(HDIMAGE) addfiles
 	@printf '$(BLU)Running $(ISOIMAGE) using $(QEMU)...\n$(RESET)'
-	@$(QEMU) $(QEMUFLAGS) -serial stdio -enable-kvm 2> /dev/null
+	@sudo $(QEMU) $(QEMUFLAGS) -serial stdio -enable-kvm 2> /dev/null
 
 rund: $(ISOIMAGE) $(HDIMAGE) addfiles
 	@printf '$(MAR)Running $(ISOIMAGE) using $(QEMU) with debug enabled...\n$(RESET)'
-	@$(QEMU) $(QEMUFLAGS) $(QEMUDFLAGS)
+	@sudo $(QEMU) $(QEMUFLAGS) $(QEMUDFLAGS)
 
 runBochs: $(ISOIMAGE) $(HDIMAGE) addfiles
 	@printf '$(BLU)Running $(ISOIMAGE) using Bochs...\n$(RESET)'
@@ -173,9 +224,9 @@ runBochs: $(ISOIMAGE) $(HDIMAGE) addfiles
 
 addfiles: $(HDIMAGE) nbdmount
 	@printf '$(BLU)Adding files to $(HDIMAGE)...\n$(RESET)'
-	@sudo mkdir -p /mnt/dev
-	@sudo mkdir -p /mnt/proc
-	@sudo mkdir -p /mnt/mnt
+	@echo ${PASSWORD} | sudo -S mkdir -p /mnt/dev
+	@echo ${PASSWORD} | sudo -S mkdir -p /mnt/proc
+	@echo ${PASSWORD} | sudo -S mkdir -p /mnt/mnt
 	@./$(SCRIPTDIR)/addfiles.sh
 	@printf '$(BLU)Files added to $(HDIMAGE)...\n$(RESET)'
 	@make -f src/Makefile nbdumount
@@ -190,7 +241,7 @@ $(HDIMAGE):
 	@printf '$(BLU)Making and formatting $(HDIMAGE)...\n$(RESET)'
 	@./$(SCRIPTDIR)/mkimg.sh
 	@make -f src/Makefile nbdstart
-	@sudo mkfs -t ext2 -i 1024 -b 1024 -F /dev/nbd0p1 2> /dev/null
+	@echo ${PASSWORD} | sudo -S mkfs -t ext2 -i 1024 -b 1024 -F /dev/nbd0p1 2> /dev/null
 	@make -f src/Makefile nbdstop
 
 mkimg: $(HDIMAGE)
@@ -200,19 +251,19 @@ delimg:
 
 nbdstart: $(HDIMAGE)
 	@printf '$(BLU)Mounting $(HDIMAGE) using nbd...\n$(RESET)'
-	sudo modprobe nbd
+	echo ${PASSWORD} | sudo -S modprobe nbd
 	sleep 1
 	udevadm settle
-	sudo qemu-nbd -c /dev/nbd0 $(HDIMAGE) --format raw
+	echo ${PASSWORD} | sudo -S qemu-nbd -c /dev/nbd0 $(HDIMAGE) --format raw
 	udevadm settle
 
 nbdmount: nbdstart
 	@printf '$(BLU)Mounting $(HDIMAGE) using nbd...\n$(RESET)'
-	sudo mount /dev/nbd0p1 /mnt
+	echo ${PASSWORD} | sudo -S mount /dev/nbd0p1 /mnt
 
 nbdstop:
-	sudo qemu-nbd -d /dev/nbd0
-	sudo modprobe -r nbd || true
+	echo ${PASSWORD} | sudo -S qemu-nbd -d /dev/nbd0
+	echo ${PASSWORD} | sudo -S modprobe -r nbd || true
 	sleep 1
 	udevadm settle
 
@@ -223,11 +274,11 @@ backup:
 
 nbdumount: $(HDIMAGE)
 	@printf '$(BLU)Unmounting $(HDIMAGE) using nbd...\n$(RESET)'
-	sudo umount /mnt
+	echo ${PASSWORD} | sudo -S umount /mnt
 	udevadm settle
-	sudo qemu-nbd -d /dev/nbd0
+	echo ${PASSWORD} | sudo -S qemu-nbd -d /dev/nbd0
 	udevadm settle
-	sudo modprobe -r nbd
+	echo ${PASSWORD} | sudo -S modprobe -r nbd
 
 $(SRCDIR)/initrd: $(SRCDIR)/mksorfs
 	./$(SRCDIR)/mksorfs $(SRCDIR)/initrd files/init

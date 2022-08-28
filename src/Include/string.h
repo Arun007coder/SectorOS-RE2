@@ -56,7 +56,8 @@ char *strdup(const char *src);
 char *strndup(const char *src, uint32_t len);
 char *strsep(char **stringp, const char *delim);
 
-void stoc(size_t n);
+void stoc(size_t n, char* buffer);
+char* stoc_r(size_t n);
 uint32_t chbc(char* str, char c);
 
 list_t *str_split(const char *str, const char *delim, uint32_t *numtokens);

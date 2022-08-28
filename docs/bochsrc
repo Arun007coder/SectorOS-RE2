@@ -6,4 +6,4 @@ speaker: enabled=1, mode=sound
 boot: cdrom
 mouse: enabled=0
 clock: sync=realtime
-cpu: ips=5000000
+cpu: ips=500000000

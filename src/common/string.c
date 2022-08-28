@@ -339,24 +339,36 @@ char *strsep(char **stringp, const char *delim) {
 
 bool alloc = false;
 
-void stoc(size_t n)
+void stoc(size_t n, char* buf)
 {
     if(((n / MB) >> 10) != 0)
     {
-        printf("%dGB", n / GB);
+        strcpy(buf, itoa_r(n / GB, 10));
+        strcat(buf, "GB");
     }
     else if (((n / KB) >> 10) != 0)
     {
-        printf("%dMB", n / MB);
+        strcpy(buf, itoa_r(n / MB, 10));
+        strcat(buf, "MB");
     }
     else if (((n) >> 10) != 0)
     {
-        printf("%dKB", n / KB);
+        strcpy(buf, itoa_r(n / KB, 10));
+        strcat(buf, "KB");
     }
     else
     {
-        printf("%dB", n);
+        strcpy(buf, itoa_r(n, 10));
+        strcat(buf, "B");
     }
+}
+
+char* stoc_r(size_t n)
+{
+    char* buffer = (char*)kmalloc(1024);
+
+    stoc(n, buffer);
+    return buffer;
 }
 
 list_t *str_split(const char *str, const char *delim, unsigned int *numtokens)

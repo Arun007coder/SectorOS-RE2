@@ -72,31 +72,30 @@ char** VFS_listdir(char* path)
 
 void print_vfstree_recur(gentree_node_t *node, int parent_offset)
 {
-    if (!node)
-        return;
-    char *tmp = (char*)kmalloc(512);
+    if (!node) return;
+    char * tmp = kmalloc(512);
     int len = 0;
     memset(tmp, 0, 512);
-    for (uint32_t i = 0; i < parent_offset; ++i)
+    for (unsigned int i = 0; i < parent_offset; ++i)
     {
         strcat(tmp, " ");
     }
-    char *curr = tmp + strlen(tmp);
-    struct vfs_entry *fnode = (struct vfs_entry *)node->data;
+    char * curr = tmp + strlen(tmp);
+    vfs_entry * fnode = (vfs_entry *)node->data;
     if (fnode->file)
     {
-        printf(curr, "%s(0x%x, %s)", fnode->name, (uint32_t)fnode->file, fnode->file->name);
+        printf("%s%s(0x%x, %s)", tmp, fnode->name, (unsigned int)fnode->file, fnode->file->name);
     }
     else
     {
-        printf(curr, "%s(empty)", fnode->name);
+        printf("%s%s(empty)", tmp, fnode->name);
     }
     printf("%s\n", tmp);
     len = strlen(fnode->name);
     kfree(tmp);
-    foreach (child, node->children)
+    foreach(child, node->children)
     {
-        print_vfstree_recur((gentree_node_t*)child->val, parent_offset + len + 1);
+        print_vfstree_recur(child->val, parent_offset + len + 1);
     }
 }
 

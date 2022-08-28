@@ -23,6 +23,9 @@
 
 FILE* Procfs_root = NULL;
 
+FILE procfs_nodes[16];
+int current_node;
+
 void procfs_open(FILE* node, uint32_t flags)
 {
     return;
@@ -126,11 +129,12 @@ char** procfs_list(FILE* node)
         list[0] = kmalloc(sizeof(char) * 5);
         list[1] = kmalloc(sizeof(char) * 5);
         list[2] = kmalloc(sizeof(char) * 10);
-        list[3] = kmalloc(sizeof(char) * 10);
 
         strcpy(list[0], "kernel");
         strcpy(list[1], "pci");
         strcpy(list[2], "registers");
+
+        list[3] = NULL;
 
         return list;
     }
@@ -184,6 +188,39 @@ void init_procfs()
     Procfs_root->close = procfs_close;
     Procfs_root->listdir = procfs_list;
     Procfs_root->finddir = procfs_finddir;
+
+    strcpy(procfs_nodes[0].name, "kernel");
+    procfs_nodes[0].flags = FS_FILE;
+    procfs_nodes[0].open = procfs_open;
+    procfs_nodes[0].close = procfs_close;
+    procfs_nodes[0].listdir = procfs_list;
+    procfs_nodes[0].finddir = procfs_finddir;
+
+    strcpy(procfs_nodes[1].name, "pci");
+    procfs_nodes[1].flags = FS_FILE;
+    procfs_nodes[1].open = procfs_open;
+    procfs_nodes[1].close = procfs_close;
+    procfs_nodes[1].listdir = procfs_list;
+    procfs_nodes[1].finddir = procfs_finddir;
+
+    strcpy(procfs_nodes[2].name, "registers");
+    procfs_nodes[2].flags = FS_FILE;
+    procfs_nodes[2].open = procfs_open;
+    procfs_nodes[2].close = procfs_close;
+    procfs_nodes[2].listdir = procfs_list;
+    procfs_nodes[2].finddir = procfs_finddir;
+
+    current_node = 3;
+
+    for(int i = 0; i < current_node; i++)
+    {
+        char* buffer = (kmalloc(1023));
+        strcpy(buffer, "/proc/");
+        strcat(buffer, procfs_nodes[i].name);
+        VFS_mount(buffer, &procfs_nodes[i]);
+    }
+
+
 }
 
 void procfs_mount(char *path)

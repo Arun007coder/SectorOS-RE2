@@ -22,6 +22,8 @@
 idt_ptr_t real_idt_ptr;
 idt_ptr_t real_gdt_ptr;
 
+bool isBIOS32INIT = false;
+
 void (*rebased_bios32_helper)() = (void*)0x7c00;
 
 void init_bios32()
@@ -35,10 +37,17 @@ void init_bios32()
 
     real_idt_ptr.base = 0;
     real_idt_ptr.limit = 0x3ff;
+
+    isBIOS32INIT = true;
 }
 
 void bios32_call(uint8_t int_num, register16_t* in_reg, register16_t* out_reg)
 {
+    if(!isBIOS32INIT)
+    {
+        init_bios32();
+    }
+
     void* new_codeBase = (void*)0x7c00;
 
     memcpy(&asm_gdt_entries, gdt_entries, sizeof(gdt_entries));
@@ -58,6 +67,8 @@ void bios32_call(uint8_t int_num, register16_t* in_reg, register16_t* out_reg)
     {
         PANIC("Not enough space for bios32_helper");
     }
+
+    alloc_region(kernel_page_dir, 0x7C00, 0x7C00 + size, 1, 1, 1);
 
     rebased_bios32_helper();
 

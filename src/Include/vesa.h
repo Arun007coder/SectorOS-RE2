@@ -104,7 +104,6 @@ bool isVesaInit();
 void vesa_getModeInfo(uint32_t mode, VBE_MODE_INFO_t* modeInfo);
 void vesa_setMode(uint32_t mode);
 
-uint32_t rgb(uint8_t r, uint8_t g, uint8_t b);
 void vesa_putPixel(uint32_t x, uint32_t y, uint32_t color);
 
 void vesa_change_mode(uint32_t width, uint32_t height, uint32_t bpp);

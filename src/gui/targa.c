@@ -19,8 +19,22 @@
 
 #include "targa.h"
 
-uint32_t* targa_parse(uint8_t* buffer, uint32_t size)
+targa_t* targa_parse(char* filename)
 {
+    FILE* f = file_open(filename, 0);
+    if(f == NULL)
+    {
+        printE("Cannot open %s\n", filename);
+        return NULL;
+    }
+
+    uint32_t size = VFS_getFileSize(f);
+
+    uint8_t* buffer = kmalloc(size);
+    VFS_read(f, 0, size, buffer);
+
+    VFS_close(f);
+
     uint32_t *data;
     int i, j, k, x, y, w = (buffer[13] << 8) + buffer[12], h = (buffer[15] << 8) + buffer[14], o = (buffer[11] << 8) + buffer[10];
     int m = ((buffer[1]? (buffer[7]>>3)*buffer[5] : 0) + 18);
@@ -98,38 +112,47 @@ uint32_t* targa_parse(uint8_t* buffer, uint32_t size)
     }
     data[0] = w;
     data[1] = h;
-    return data;
+
+    kfree(buffer);
+
+    targa_t* targa = kmalloc(sizeof(targa_t));
+    targa->height = data[1];
+    targa->width = data[0];
+
+    targa->size = size;
+
+    targa->img_buffer = kmalloc(size);
+
+    for(uint32_t i = 2; i < size; i++)
+    {
+        targa->img_buffer[i - 2] = data[i];
+    }
+
+    kfree(data);
+    return targa;
 }
 
 void targa_display(char* name)
 {
-    uint32_t *data;
-    int i, j, k, x, y, w, h;
-    uint8_t *buffer;
-    FILE *f = file_open(name, 0);
-    if(!f) return;
+    targa_t* data = targa_parse(name);
 
-    buffer = (uint8_t*)kmalloc(f->size);
-    if(!buffer) return;
-
-    VFS_read(f, 0, f->size, buffer);
-
-    data = targa_parse(buffer, f->size);
-
-    if(!data) {
-        kfree(buffer);
+    if(!data)
+    {
         return;
     }
 
-    w = data[0];
-    h = data[1];
-    kfree(buffer);
+    uint32_t w = data->width;
+    uint32_t h = data->height;
+
+    uint32_t x, y;
 
     uint32_t* framebuffer = (uint32_t*)vesa_getFramebuffer();
 
-    for(y=0; y<h; y++) {
-        for(x=0; x<w; x++) {
-            framebuffer[y*vesa_getXResolution() + x] = data[2 + y*w + x];
+    for(y=0; y<h; y++)
+    {
+        for(x=0; x<w; x++)
+        {
+            framebuffer[y*vesa_getXResolution() + x] = data->img_buffer[y*w + x];
         }
     }
 

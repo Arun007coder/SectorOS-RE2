@@ -23,10 +23,20 @@ Second rewrite of the SectorOS project. Written in C and assembly.
 * Added support for TGA and BMP image files
 * Added logdisk driver
 * Added ramdisk driver
-* Added support for SORFS [SectorOS Ram File System]
+* Added support for SORFS [SectorOS ROM File System]
 * Added MBR support
 * Added auto detection of the filesystem
 * Implemented usermode support
+* Added driver for rtl8139
+* Implemented Network interface manager
+* Implemented ARP
+* Implemented IPv4
+* Implemented UDP
+* Implemented DHCP
+* Implemented a psuedorandom number generator
+* Implemented a basic drawing library
+* Implemented fonts
+* Added driver for APM
 
 ## Bugs
 
@@ -34,12 +44,13 @@ Second rewrite of the SectorOS project. Written in C and assembly.
 * Sometimes EXT2 filesystem only lists folders
 * SORFS is Read Only
 * OS does not work on bare-metal
+* ICMP does not work
 
 ## TODO
 
 * Implement driver for mouse and other devices
 * Implement Tasking
-* Implement Networking
+* Implement TCP
 * Implement http server
 * Implement ELF loader
 * Make SORFS read-write
@@ -57,6 +68,11 @@ To build an ISO image, run the following command:
 make -f src/Makefile iso
 ```
 
+Before Running, run the following command:
+```bash
+make -f src/Makefile setupTAP
+```
+
 To run the project on qemu, run the following command:
 ```bash
 make -f src/Makefile runQEMU
@@ -65,6 +81,11 @@ make -f src/Makefile runQEMU
 To run the project on qemu KVM, run the following command:
 ```bash
 make -f src/Makefile runKVM
+```
+
+After running, run the following command:
+```bash
+make -f src/Makefile stopTAP1
 ```
 
 ## Resources
@@ -79,4 +100,4 @@ The resources used in this project are:
 
 ## License
 
-This project is licensed under the [GNU GPLv3](../LICENSE).
+This project is licensed under the [GNU GPLv3](../LICENSE). <img align="right" src="https://www.gnu.org/graphics/gplv3-with-text-136x68.png"></img>

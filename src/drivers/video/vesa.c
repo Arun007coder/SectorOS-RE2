@@ -159,10 +159,17 @@ uint32_t rgb(uint8_t r, uint8_t g, uint8_t b)
 
 void vesa_change_mode(uint32_t width, uint32_t height, uint32_t bpp)
 {
+    if(!isVesaInit())
+    {
+        serial_printf("Init vesa\n");
+        init_vesa();
+    }
+
     uint32_t mode = vesa_find_mode(width, height, bpp);
     if(mode == 0)
     {
         printE("Error: Could not find a suitable mode!\n");
+        serial_printf("Error: Could not find a suitable mode!\n");
         return;
     }
     vesa_setMode(0x4000 | mode);
@@ -216,5 +223,5 @@ void init_vesa()
 
 bool isVesaInit()
 {
-    return isVesaInitialized == 1;
+    return (isVesaInitialized == 1);
 }

@@ -78,6 +78,7 @@ void exception_handler(registers_t cps)
         printf("ESI = 0x%06x\n", cps.esi);
         printf("EDI = 0x%06x\n", cps.edi);
         printf("EBP = 0x%06x\n", cps.ebp);
+        print_eflags(cps.eflags);
         change_color(VGA_WHITE, VGA_BLACK);
     }
 
@@ -92,6 +93,6 @@ void exception_handler(registers_t cps)
     }
     else
     {
-        PANIC("Unhandled exception!");
+        kernel_panic("Unhandled exception!");
     }
 }

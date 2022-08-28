@@ -22,7 +22,16 @@
 #include "string.h"
 #include "vesa.h"
 
-uint32_t* targa_parse(uint8_t* buffer, uint32_t size);
+typedef struct targa
+{
+    uint32_t width;
+    uint32_t height;
+    uint32_t size;
+
+    uint32_t* img_buffer;
+}targa_t;
+
+targa_t* targa_parse(char* filename);
 void targa_display(char* name);
 
 #endif

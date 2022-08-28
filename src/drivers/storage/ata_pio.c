@@ -133,9 +133,7 @@ void ata_pio_identify(ata_pio_t* ap)
     ap->model[40] = 0;
 
     printf("[ATA PIO] Model: %s\n", ap->model);
-    printf("[ATA PIO] Size: ");
-    stoc(ap->size);
-    printf("\n");
+    printf("[ATA PIO] Size: %s\n", stoc_r(ap->size));
 
     printl("[ATA PIO] Device found on %s %s\n", ap->basePort == 0x1F0 ? "Primary" : "Secondary", ap->master ? "Master" : "Slave");
     printl("[ATA PIO] Model: %s\n", ap->model);
