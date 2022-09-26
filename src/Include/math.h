@@ -32,6 +32,6 @@ void seed(uint16_t seed);
 uint32_t rand();
 uint32_t rand_range(uint32_t min, uint32_t max);
 
-uint32_t getBIT(uint32_t b, int num);
+uint32_t get_bits(uint32_t value, uint32_t startBit, uint32_t n);
 
 #endif

@@ -176,9 +176,7 @@ void load_init(char* path)
 
 void load_initfile(void)
 {
-    asm volatile("int $0x80" :: "a"(0x09));
     int isFork;
-    asm volatile("mov %%eax, %0" : "=r"(isFork));
 
     list_t *initfile_list = list_create();
 

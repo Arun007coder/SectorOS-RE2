@@ -19,25 +19,49 @@
 
 #include "syscall.h"
 #include "vesa.h"
+#include "process.h"
 
-void * syscall_table[10] = {
-    putchar,
-    printf,
-    VFS_create,
-    vesa_change_mode,
-    file_open,
-    VFS_close,
-    VFS_read,
-    VFS_write,
-    VFS_getFileSize,
-    malloc,
+void * syscall_table[MAX_SYSCALLS] = {
+    putchar, //0
+    exit, //1
+    attach_handler, //2
+    file_open, //3
+    VFS_close, //4
+    syscall_vfs_read, //5
+    syscall_vfs_write, //6
+    VFS_getFileSize, //7
+    VFS_create, //8
+    malloc, //9
+    free, //10
+    realloc, //11
+    rand, //12
+    wait, //13
+    syscall_create_process, //14
+    change_process, //15
+    clear, //16
 };
+
+void syscall_create_process(char* name, void* entrypoint)
+{
+    create_process_from_routine(name, entrypoint, TASK_TYPE_USER);
+}
+
+void syscall_vfs_read(vfs_node* file, syscall_rwo_t* options)
+{
+    VFS_read(file, options->offset, options->size, options->buffer);
+}
+
+void syscall_vfs_write(vfs_node* file, syscall_rwo_t* options)
+{
+    VFS_read(file, options->offset, options->size, options->buffer);
+}
 
 void syscall_handler(registers_t *reg)
 {
-    if(reg->eax >= 20) return;
+    if(reg->eax >= MAX_SYSCALLS) return;
     void * system_api = syscall_table[reg->eax];
     int ret;
+    memcpy(&saved_context, reg, sizeof(registers_t));
     asm volatile (" \
     push %1; \
     push %2; \

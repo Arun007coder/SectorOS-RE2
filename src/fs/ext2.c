@@ -854,7 +854,6 @@ void ext2_DebugPrintInode(inode_t* inode, ext2_fs* fs)
     serial_printf("Size: %d\n", inode->size);
     serial_printf("num_sectors: %d\n", inode->num_sectors);
     serial_printf("Links: %d\n", inode->hard_links);
-    serial_printf("Blocks: %d\n", inode->blocks);
     serial_printf("Flags: %d\n\n", inode->flags);
 }
 

@@ -340,7 +340,7 @@ void shell_interpreter()
     shell_buffer_index = 0;
 }
 
-bool isShift;
+bool isShifted;
 bool isCTRLed;
 
 char KCTC(uint8_t keyCode)
@@ -362,292 +362,292 @@ char KCTC(uint8_t keyCode)
             result = '\t';
             break;
         case 0x29:
-            if (!isShift)
+            if (!isShifted)
                 result = '`';
             else
                 result = '~';
             break;
         case 0x02:
-            if (!isShift)
+            if (!isShifted)
                 result = '1';
             else
                 result = '!';
             break;
         case 0x03:
-            if (!isShift)
+            if (!isShifted)
                 result = '2';
             else
                 result = '@';
             break;
         case 0x04:
-            if (!isShift)
+            if (!isShifted)
                 result = '3';
             else
                 result = '#';
             break;
         case 0x05:
-            if (!isShift)
+            if (!isShifted)
                 result = '4';
             else
                 result = '$';
             break;
         case 0x06:
-            if (!isShift)
+            if (!isShifted)
                 result = '5';
             else
                 result = '%';
             break;
         case 0x07:
-            if (!isShift)
+            if (!isShifted)
                 result = '6';
             else
                 result = '^';
             break;
         case 0x08:
-            if (!isShift)
+            if (!isShifted)
                 result = '7';
             else
                 result = '&';
             break;
         case 0x09:
-            if (!isShift)
+            if (!isShifted)
                 result = '8';
             else
                 result = '*';
             break;
         case 0x0A:
-            if (!isShift)
+            if (!isShifted)
                 result = '9';
             else
                 result = '(';
             break;
         case 0x0B:
-            if (!isShift)
+            if (!isShifted)
                 result = '0';
             else
                 result = ')';
             break;
         case 0x0C:
-            if (!isShift)
+            if (!isShifted)
                 result = '-';
             else
                 result = '_';
             break;
         case 0x0D:
-            if (!isShift)
+            if (!isShifted)
                 result = '=';
             else
                 result = '+';
             break;
 
         case 0x10:
-            if (!isShift)
+            if (!isShifted)
                 result = 'q';
             else
                 result = 'Q';
             break;
         case 0x11:
-            if (!isShift)
+            if (!isShifted)
                 result = 'w';
             else
                 result = 'W';
             break;
         case 0x12:
-            if (!isShift)
+            if (!isShifted)
                 result = 'e';
             else
                 result = 'E';
             break;
         case 0x13:
-            if (!isShift)
+            if (!isShifted)
                 result = 'r';
             else
                 result = 'R';
             break;
         case 0x14:
-            if (!isShift)
+            if (!isShifted)
                 result = 't';
             else
                 result = 'T';
             break;
         case 0x15:
-            if (!isShift)
+            if (!isShifted)
                 result = 'y';
             else
                 result = 'Y';
             break;
         case 0x16:
-            if (!isShift)
+            if (!isShifted)
                 result = 'u';
             else
                 result = 'U';
             break;
         case 0x17:
-            if (!isShift)
+            if (!isShifted)
                 result = 'i';
             else
                 result = 'I';
             break;
         case 0x18:
-            if (!isShift)
+            if (!isShifted)
                 result = 'o';
             else
                 result = 'O';
             break;
         case 0x19:
-            if (!isShift)
+            if (!isShifted)
                 result = 'p';
             else
                 result = 'P';
             break;
         case 0x1A:
-            if (!isShift)
+            if (!isShifted)
                 result = '[';
             else
                 result = '{';
             break;
         case 0x1B:
-            if (!isShift)
+            if (!isShifted)
                 result = ']';
             else
                 result = '}';
             break;
         case 0x1C:
-            if (!isShift)
+            if (!isShifted)
                 result = '\n';
             else
                 result = '\n';
             break;
 
         case 0x1E:
-            if (!isShift)
+            if (!isShifted)
                 result = 'a';
             else
                 result = 'A';
             break;
         case 0x1F:
-            if (!isShift)
+            if (!isShifted)
                 result = 's';
             else
                 result = 'S';
             break;
         case 0x20:
-            if (!isShift)
+            if (!isShifted)
                 result = 'd';
             else
                 result = 'D';
             break;
         case 0x21:
-            if (!isShift)
+            if (!isShifted)
                 result = 'f';
             else
                 result = 'F';
             break;
         case 0x22:
-            if (!isShift)
+            if (!isShifted)
                 result = 'g';
             else
                 result = 'G';
             break;
         case 0x23:
-            if (!isShift)
+            if (!isShifted)
                 result = 'h';
             else
                 result = 'H';
             break;
         case 0x24:
-            if (!isShift)
+            if (!isShifted)
                 result = 'j';
             else
                 result = 'J';
             break;
         case 0x25:
-            if (!isShift)
+            if (!isShifted)
                 result = 'k';
             else
                 result = 'K';
             break;
         case 0x26:
-            if (!isShift)
+            if (!isShifted)
                 result = 'l';
             else
                 result = 'L';
             break;
         case 0x27:
-            if (!isShift)
+            if (!isShifted)
                 result = ';';
             else
                 result = ':';
             break;
 
         case 0x2C:
-            if (!isShift)
+            if (!isShifted)
                 result = 'z';
             else
                 result = 'Z';
             break;
         case 0x2D:
-            if (!isShift)
+            if (!isShifted)
                 result = 'x';
             else
                 result = 'X';
             break;
         case 0x2E:
-            if (!isShift)
+            if (!isShifted)
                 result = 'c';
             else
                 result = 'C';
             break;
         case 0x2F:
-            if (!isShift)
+            if (!isShifted)
                 result = 'v';
             else
                 result = 'V';
             break;
         case 0x30:
-            if (!isShift)
+            if (!isShifted)
                 result = 'b';
             else
                 result = 'B';
             break;
         case 0x31:
-            if (!isShift)
+            if (!isShifted)
                 result = 'n';
             else
                 result = 'N';
             break;
         case 0x32:
-            if (!isShift)
+            if (!isShifted)
                 result = 'm';
             else
                 result = 'M';
             break;
         case 0x33:
-            if (!isShift)
+            if (!isShifted)
                 result = ',';
             else
                 result = '<';
             break;
         case 0x34:
-            if (!isShift)
+            if (!isShifted)
                 result = '.';
             else
                 result = '>';
             break;
         case 0x35:
-            if (!isShift)
+            if (!isShifted)
                 result = '/';
             else
                 result = '?';
             break;
         case 0x39:
-            if (!isShift)
+            if (!isShifted)
                 result = ' ';
             else
                 result = ' ';
             break;
         case 0x2B:
-            if (!isShift)
+            if (!isShifted)
                 result = '\\';
             else
                 result = '|';
@@ -686,67 +686,67 @@ void shell_run(uint8_t cmd)
     {
         case 0xFA: break;
         case 0x45: case 0xC5: case 0x61: break;
-        case 0x29:if (!isShift) printf("`"); else printf("~"); break;
-        case 0x02:if (!isShift) printf("1"); else printf("!"); break;
-        case 0x03:if (!isShift) printf("2"); else printf("@"); break;
-        case 0x04:if (!isShift) printf("3"); else printf("#"); break;
-        case 0x05:if (!isShift) printf("4"); else printf("$"); break;
-        case 0x06:if (!isShift) printf("5"); else printf("%%"); break;
-        case 0x07:if (!isShift) printf("6"); else printf("^"); break;
-        case 0x08:if (!isShift) printf("7"); else printf("&"); break;
-        case 0x09:if (!isShift) printf("8"); else printf("*"); break;
-        case 0x0A:if (!isShift) printf("9"); else printf("("); break;
-        case 0x0B:if (!isShift) printf("0"); else printf(")"); break;
-        case 0x0C:if (!isShift) printf("-"); else printf("_"); break;
-        case 0x0D:if (!isShift) printf("="); else printf("+"); break;
+        case 0x29:if (!isShifted) printf("`"); else printf("~"); break;
+        case 0x02:if (!isShifted) printf("1"); else printf("!"); break;
+        case 0x03:if (!isShifted) printf("2"); else printf("@"); break;
+        case 0x04:if (!isShifted) printf("3"); else printf("#"); break;
+        case 0x05:if (!isShifted) printf("4"); else printf("$"); break;
+        case 0x06:if (!isShifted) printf("5"); else printf("%%"); break;
+        case 0x07:if (!isShifted) printf("6"); else printf("^"); break;
+        case 0x08:if (!isShifted) printf("7"); else printf("&"); break;
+        case 0x09:if (!isShifted) printf("8"); else printf("*"); break;
+        case 0x0A:if (!isShifted) printf("9"); else printf("("); break;
+        case 0x0B:if (!isShifted) printf("0"); else printf(")"); break;
+        case 0x0C:if (!isShifted) printf("-"); else printf("_"); break;
+        case 0x0D:if (!isShifted) printf("="); else printf("+"); break;
         case 0x0F: printf("\t"); break;
-        case 0x10:if (!isShift) printf("q"); else printf("Q"); break;
-        case 0x11:if (!isShift) printf("w"); else printf("W"); break;
-        case 0x12:if (!isShift) printf("e"); else printf("E"); break;
-        case 0x13:if (!isShift) printf("r"); else printf("R"); break;
-        case 0x14:if (!isShift) printf("t"); else printf("T"); break;
-        case 0x15:if (!isShift) printf("y"); else printf("Y"); break;
-        case 0x16:if (!isShift) printf("u"); else printf("U"); break;
-        case 0x17:if (!isShift) printf("i"); else printf("I"); break;
-        case 0x18:if (!isShift) printf("o"); else printf("O"); break;
-        case 0x19:if (!isShift) printf("p"); else printf("P"); break;
-        case 0x1A:if (!isShift) printf("["); else printf("{"); break;
-        case 0x1B:if (!isShift) printf("]"); else printf("}"); break;
+        case 0x10:if (!isShifted) printf("q"); else printf("Q"); break;
+        case 0x11:if (!isShifted) printf("w"); else printf("W"); break;
+        case 0x12:if (!isShifted) printf("e"); else printf("E"); break;
+        case 0x13:if (!isShifted) printf("r"); else printf("R"); break;
+        case 0x14:if (!isShifted) printf("t"); else printf("T"); break;
+        case 0x15:if (!isShifted) printf("y"); else printf("Y"); break;
+        case 0x16:if (!isShifted) printf("u"); else printf("U"); break;
+        case 0x17:if (!isShifted) printf("i"); else printf("I"); break;
+        case 0x18:if (!isShifted) printf("o"); else printf("O"); break;
+        case 0x19:if (!isShifted) printf("p"); else printf("P"); break;
+        case 0x1A:if (!isShifted) printf("["); else printf("{"); break;
+        case 0x1B:if (!isShifted) printf("]"); else printf("}"); break;
         case 0x1C: 
             shell_buffer[shell_buffer_index] = '\0';
             shell_interpreter();
         break; //Enter
-        case 0x1E:if (!isShift) printf("a"); else printf("A"); break;
-        case 0x1F:if (!isShift) printf("s"); else printf("S"); break;
-        case 0x20:if (!isShift) printf("d"); else printf("D"); break;
-        case 0x21:if (!isShift) printf("f"); else printf("F"); break;
-        case 0x22:if (!isShift) printf("g"); else printf("G"); break;
-        case 0x23:if (!isShift) printf("h"); else printf("H"); break;
-        case 0x24:if (!isShift) printf("j"); else printf("J"); break;
-        case 0x25:if (!isShift) printf("k"); else printf("K"); break;
-        case 0x26:if (!isShift) printf("l"); else printf("L"); break;
-        case 0x27:if (!isShift) printf(";"); else printf(":"); break;
-        case 0x28:if (!isShift) printf("E"); else printf("e"); break;
-        case 0x2B:if (!isShift) printf("\\"); else printf("|"); break;
-        case 0x2A: isShift = true; break;
-        case 0x2C:if (!isShift) printf("z"); else printf("Z"); break;
-        case 0x2D:if (!isShift) printf("x"); else printf("X"); break;
-        case 0x2E: if (!isShift) printf("c"); else printf("C");break;
-        case 0x2F:if (!isShift) printf("v"); else printf("V"); break;
-        case 0x30:if (!isShift) printf("b"); else printf("B"); break;
-        case 0x31:if (!isShift) printf("n"); else printf("N"); break;
-        case 0x32:if (!isShift) printf("m"); else printf("M"); break;
-        case 0x33:if (!isShift) printf(","); else printf("<"); break;
-        case 0x34:if (!isShift) printf("."); else printf(">"); break;
-        case 0x35:if (!isShift) printf("/"); else printf("?"); break;
+        case 0x1E:if (!isShifted) printf("a"); else printf("A"); break;
+        case 0x1F:if (!isShifted) printf("s"); else printf("S"); break;
+        case 0x20:if (!isShifted) printf("d"); else printf("D"); break;
+        case 0x21:if (!isShifted) printf("f"); else printf("F"); break;
+        case 0x22:if (!isShifted) printf("g"); else printf("G"); break;
+        case 0x23:if (!isShifted) printf("h"); else printf("H"); break;
+        case 0x24:if (!isShifted) printf("j"); else printf("J"); break;
+        case 0x25:if (!isShifted) printf("k"); else printf("K"); break;
+        case 0x26:if (!isShifted) printf("l"); else printf("L"); break;
+        case 0x27:if (!isShifted) printf(";"); else printf(":"); break;
+        case 0x28:if (!isShifted) printf("E"); else printf("e"); break;
+        case 0x2B:if (!isShifted) printf("\\"); else printf("|"); break;
+        case 0x2A: isShifted = true; break;
+        case 0x2C:if (!isShifted) printf("z"); else printf("Z"); break;
+        case 0x2D:if (!isShifted) printf("x"); else printf("X"); break;
+        case 0x2E: if (!isShifted) printf("c"); else printf("C");break;
+        case 0x2F:if (!isShifted) printf("v"); else printf("V"); break;
+        case 0x30:if (!isShifted) printf("b"); else printf("B"); break;
+        case 0x31:if (!isShifted) printf("n"); else printf("N"); break;
+        case 0x32:if (!isShifted) printf("m"); else printf("M"); break;
+        case 0x33:if (!isShifted) printf(","); else printf("<"); break;
+        case 0x34:if (!isShifted) printf("."); else printf(">"); break;
+        case 0x35:if (!isShifted) printf("/"); else printf("?"); break;
         case 0x39: printf(" "); break;
-        case 0x36: isShift = true; break;
-        case 0xAA: case 0xB6: isShift = false; break;
-        case 0x3A: if(isShift){
-            isShift = false;
+        case 0x36: isShifted = true; break;
+        case 0xAA: case 0xB6: isShifted = false; break;
+        case 0x3A: if(isShifted){
+            isShifted = false;
         }
         else{
-            isShift = true;
+            isShifted = true;
         }
         break;
         case 0x1D:

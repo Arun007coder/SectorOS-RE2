@@ -72,23 +72,23 @@ uint8_t register_l(uint16_t reg)
 
 void print_eflags(uint32_t eflags)
 {
-    int CF = (eflags & 0x0001);
-    int PF = (eflags & 0x0004);
-    int AF = (eflags & 0x0010);
-    int ZF = (eflags & 0x0040);
-    int SF = (eflags & 0x0080);
-    int TF = (eflags & 0x0100);
-    int IF = (eflags & 0x0400);
-    int DF = (eflags & 0x0800);
-    int OF = (eflags & 0x1000);
-    int IOPL = (eflags & 0x3000) >> 12;
-    int NT = (eflags & 0x4000);
-    int RF = (eflags & 0x10000);
-    int VM = (eflags & 0x20000);
-    int AC = (eflags & 0x40000);
-    int VIF = (eflags & 0x80000);
-    int VIP = (eflags & 0x100000);
-    int ID = (eflags & 0x200000);
+    int CF = get_bits(eflags, 0, 2);
+    int PF = get_bits(eflags, 2, 2);
+    int AF = get_bits(eflags, 4, 2);
+    int ZF = get_bits(eflags, 6, 1);
+    int SF = get_bits(eflags, 7, 1);
+    int TF = get_bits(eflags, 8, 1);
+    int IF = get_bits(eflags, 9, 1);
+    int DF = get_bits(eflags, 10, 1);
+    int OF = get_bits(eflags, 11, 1);
+    int IOPL = get_bits(eflags, 12, 2);
+    int NT = get_bits(eflags, 14, 1);
+    int RF = get_bits(eflags, 16, 1);
+    int VM = get_bits(eflags, 17, 1);
+    int AC = get_bits(eflags, 18, 1);
+    int VIF = get_bits(eflags, 19, 1);
+    int VIP = get_bits(eflags, 20, 1);
+    int ID = get_bits(eflags, 21, 1);
 
     printf("flags: [ ");
     printf("%s", CF ? "Carry " : "");

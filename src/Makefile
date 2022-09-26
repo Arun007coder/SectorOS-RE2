@@ -74,6 +74,7 @@ NETWORK_INTERFACE = enp2s0
 OBJECTS = \
 	$(SRCDIR)/multiboot.o \
 	$(SRCDIR)/loader.o	\
+	$(SRCDIR)/process/spinlock.o \
 	$(SRCDIR)/descriptors/gdt_helper.o	\
 	$(SRCDIR)/descriptors/gdt.o	\
 	$(SRCDIR)/drivers/cpu/pic.o	\
@@ -140,6 +141,8 @@ OBJECTS = \
 	$(SRCDIR)/program/shell.o \
 	$(SRCDIR)/program/initfile.o \
 	$(SRCDIR)/process/usermode.o \
+	$(SRCDIR)/process/process.o \
+	$(SRCDIR)/process/context_switch.o \
 	$(SRCDIR)/gui/blend.o \
 	$(SRCDIR)/gui/draw.o \
 	$(SRCDIR)/gui/font/font.o \

@@ -19,6 +19,8 @@
 
 #include "pit.h"
 
+#include "process.h"
+
 uint32_t pit_ticks = 0;
 uint32_t pit_freq = 0;
 uint32_t pit_freq_before = 0;
@@ -29,7 +31,7 @@ void timer_callback(registers_t *reg)
 {
     pit_ticks++;
     time_since_boot = pit_ticks * pit_freq;
-
+    memcpy(&saved_context, reg, sizeof(registers_t));
     foreach(t, wakeup_list)
     {
         wakeup_info_t* w = (wakeup_info_t*)t->val;
@@ -54,6 +56,7 @@ void chfreq(uint32_t freq)
     outb(PIT_CHANNEL0, (uint8_t)(divisor & 0xFF));
     outb(PIT_CHANNEL0, (uint8_t)((divisor >> 8) & 0xFF));
 }
+
 
 uint32_t get_freq()
 {

@@ -56,3 +56,11 @@ uint32_t rand_range(uint32_t min, uint32_t max)
     return rand() % (max - min + 1) + min;
 }
 
+uint32_t get_bits(uint32_t value, uint32_t startBit, uint32_t X)
+{
+    unsigned  mask;
+    mask = ((1 << X) - 1) << startBit;
+    uint32_t isolatedXbits = value & mask;
+    return isolatedXbits;
+
+}

@@ -68,10 +68,10 @@ bool isAllZero(const void* data, size_t size);
 #define KERNEL_BASE 0xC0000000
 #define KERNEL_END  end
 
-#define KERNEL_VERSION "5.0.0"
+#define KERNEL_VERSION "5.1.2"
 #define KERNEL_NAME "SectorOS-RE2"
 
-#define SOSH_VERSION "0.1.8"
+#define SOSH_VERSION "0.2.0"
 
 void print_cpuinfo();
 void reboot();

@@ -22,6 +22,18 @@
 
 extern void gdt_flush(uint32_t);
 
+
+void gdt_handler(registers_t* registers)
+{
+    uint32_t ecode = registers->ecode;
+    int External = get_bits(ecode, 0, 1);
+    int table = get_bits(ecode, 1, 1);
+    int index = get_bits(ecode, 2, 13);
+
+    printE("This fault was happened %s inside %s entry #%d.\n", External == 0 ? "internally" : "externally", (table == 0b00 ? "GDT" : (table == 0b01) ? "IDT" : (table == 0b10) ? "LDT" : "Unknown"), index);
+    kernel_panic("GPF");
+}
+
 void flush_gdt();
 
 gdt_entry_t gdt_entries[GDT_ENTRY_COUNT];
@@ -41,6 +53,8 @@ void init_gdt()
     gdt_flush((uint32_t)&gdt_ptr);
 
     init_tss(5, 0x10, 0);
+
+    register_interrupt_handler(13, gdt_handler);
 }
 
 void gdt_set_gate(int32_t num, uint32_t base, uint32_t limit, uint8_t access, uint8_t gran)

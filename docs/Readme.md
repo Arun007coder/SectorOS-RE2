@@ -37,6 +37,11 @@ Second rewrite of the SectorOS project. Written in C and assembly.
 * Implemented a basic drawing library
 * Implemented fonts
 * Added driver for APM
+* Implemented cooperative multitasking
+* Added new syscalls
+* Implemented spinlock
+* Implemented input handler for processes
+* Added a new shell which works as a process
 
 ## Bugs
 
